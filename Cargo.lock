@@ -1460,6 +1460,7 @@ dependencies = [
 name = "salvo-skeleton"
 version = "0.1.0"
 dependencies = [
+ "async-trait",
  "dotenv",
  "salvo",
  "serde",
