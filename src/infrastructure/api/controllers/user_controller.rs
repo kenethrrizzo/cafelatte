@@ -1,7 +1,17 @@
 use salvo::prelude::*;
 
-/// Recibe un request y un response, con el response se envía el mensaje.
 #[handler]
-pub async fn hello_world(_req: &mut Request, res: &mut Response) {
-    res.status_code(StatusCode::OK).render("Hello, World!");
+async fn get_users(_res: &mut Response) {}
+
+#[handler]
+async fn get_user_by_id(_req: &mut Request, _res: &mut Response) {}
+
+#[handler]
+async fn create_user(_req: &mut Request, _res: &mut Response) {}
+
+pub fn router() -> Router {
+    Router::with_path("users")
+        .get(get_users)
+        .post(create_user)
+        .push(Router::with_path("<id>").get(get_user_by_id))
 }
