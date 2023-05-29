@@ -13,17 +13,20 @@ struct UserResponse {
 
 #[get("/users")]
 pub async fn get_users(user_service: UserService) -> impl Responder {
-    let users = user_service.get_users().await.unwrap();
+    match user_service.get_users().await {
+        Ok(users) => {
+            let mut response: Vec<UserResponse> = vec![];
+            for user in users {
+                response.push(UserResponse {
+                    name: user.name,
+                    surname: user.surname,
+                });
+            }
 
-    let mut response: Vec<UserResponse> = vec![];
-    for user in users {
-        response.push(UserResponse {
-            name: user.name,
-            surname: user.surname,
-        });
+            return HttpResponse::Ok().json(response);
+        }
+        Err(_) => return HttpResponse::InternalServerError().body("Error"),
     }
-
-    HttpResponse::Ok().json(response)
 }
 
 #[get("/users/{id}")]
