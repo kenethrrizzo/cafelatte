@@ -1,10 +1,12 @@
 use crate::core::entities::user::User as UserCore;
 use crate::core::ports::user_port::IUserRepository;
 use crate::infrastructure::data::models::user::User as UserModel;
+use async_trait::async_trait;
 use core::result::Result;
 
+#[derive(Clone)]
 pub struct UserRepository {
-    conn: sqlx::MySqlPool,
+    pub conn: sqlx::MySqlPool,
 }
 
 impl UserRepository {
@@ -13,7 +15,7 @@ impl UserRepository {
     }
 }
 
-#[async_trait::async_trait]
+#[async_trait]
 impl IUserRepository for UserRepository {
     async fn get_users(&self) -> Result<Vec<UserCore>, anyhow::Error> {
         let rows = sqlx::query_as::<_, UserModel>("SELECT id, name, surname FROM user")

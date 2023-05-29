@@ -5,6 +5,7 @@ use crate::core::{
     ports::user_port::{IUserRepository, IUserService},
 };
 
+#[derive(Clone)]
 pub struct UserService<R>
 where
     R: IUserRepository,

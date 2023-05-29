@@ -1,17 +1,16 @@
-use salvo::prelude::*;
+use actix_web::{get, post, HttpResponse, Responder};
 
-#[handler]
-async fn get_users(_res: &mut Response) {}
+#[get("/users")]
+pub async fn get_users() -> impl Responder {
+    HttpResponse::Ok().body("get-users")
+}
 
-#[handler]
-async fn get_user_by_id(_req: &mut Request, _res: &mut Response) {}
+#[get("/users/{id}")]
+pub async fn get_user_by_id() -> impl Responder {
+    HttpResponse::Ok().body("get-user-by-id")
+}
 
-#[handler]
-async fn create_user(_req: &mut Request, _res: &mut Response) {}
-
-pub fn router() -> Router {
-    Router::with_path("users")
-        .get(get_users)
-        .post(create_user)
-        .push(Router::with_path("<id>").get(get_user_by_id))
+#[post("/users")]
+pub async fn create_user() -> impl Responder {
+    HttpResponse::Created().body("create-user")
 }

@@ -1,9 +1,26 @@
-use salvo::{conn::tcp::TcpAcceptor, prelude::*};
-use salvo_skeleton::infrastructure::api::controllers::user_controller;
+use actix_web::{web, App, HttpServer};
+use salvo_skeleton::{
+    core::services::user_service::UserService,
+    infrastructure::{
+        api::controllers::user_controller::{create_user, get_user_by_id, get_users},
+        data::{mysql, repositories::user_repository::UserRepository},
+    },
+};
 
-#[tokio::main]
-async fn main() {
-    let router: Router = Router::with_path("").push(user_controller::router());
-    let acceptor: TcpAcceptor = TcpListener::new("127.0.0.1:5800").bind().await;
-    Server::new(acceptor).serve(router).await;
+#[actix_web::main]
+async fn main() -> std::io::Result<()> {
+    let conn = mysql::connect_to_database().await.unwrap();
+    let user_repo = UserRepository::new(conn);
+    let user_service = UserService::new(user_repo);
+
+    HttpServer::new(move || {
+        App::new()
+            .service(get_users)
+            .service(get_user_by_id)
+            .service(create_user)
+            .app_data(web::Data::new(user_service.clone()))
+    })
+    .bind(("127.0.0.1", 8080))?
+    .run()
+    .await
 }
