@@ -27,8 +27,10 @@ pub async fn get_users(user_service: UserService) -> impl Responder {
 }
 
 #[get("/users/{id}")]
-pub async fn get_user_by_id(user_service: UserService) -> impl Responder {
-    if let Ok(user) = user_service.get_user_by_id(1).await {
+pub async fn get_user_by_id(user_service: UserService, path: web::Path<u8>) -> impl Responder {
+    let user_id = path.into_inner();
+
+    if let Ok(user) = user_service.get_user_by_id(user_id).await {
         HttpResponse::Ok().json(UserResponse {
             name: user.name,
             surname: user.surname,
