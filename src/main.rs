@@ -1,6 +1,9 @@
+use std::sync::Arc;
+
 use actix_web::{web, App, HttpServer};
+use dotenv::dotenv;
 use salvo_skeleton::{
-    core::services::user_service::UserService,
+    core::{ports::user_port::IUserService, services::user_service::UserService},
     infrastructure::{
         api::controllers::user_controller::{create_user, get_user_by_id, get_users},
         data::{mysql, repositories::user_repository::UserRepository},
@@ -9,9 +12,11 @@ use salvo_skeleton::{
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    dotenv().ok();
+
     let conn = mysql::connect_to_database().await.unwrap();
     let user_repo = UserRepository::new(conn);
-    let user_service = UserService::new(user_repo);
+    let user_service: Arc<dyn IUserService> = Arc::new(UserService::new(user_repo));
 
     HttpServer::new(move || {
         App::new()

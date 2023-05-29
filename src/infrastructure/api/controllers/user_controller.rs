@@ -1,7 +1,15 @@
-use actix_web::{get, post, HttpResponse, Responder};
+use crate::core::ports::user_port::IUserService;
+use actix_web::{get, post, web, HttpResponse, Responder};
+use std::sync::Arc;
 
 #[get("/users")]
-pub async fn get_users() -> impl Responder {
+pub async fn get_users(user_service: web::Data<Arc<dyn IUserService>>) -> impl Responder {
+    let users = user_service.get_users().await.unwrap();
+
+    for user in users {
+        println!("User name: {}", user.name);
+    }
+
     HttpResponse::Ok().body("get-users")
 }
 
