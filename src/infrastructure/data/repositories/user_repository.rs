@@ -24,7 +24,7 @@ impl IUserRepository for UserRepository {
 
         let mut users: Vec<UserCore> = Vec::new();
         for row in &rows {
-            users.push(user_model_to_user_core(row.clone()));
+            users.push(UserCore::from(row.clone()));
         }
 
         Ok(users)
@@ -36,18 +36,10 @@ impl IUserRepository for UserRepository {
             .fetch_one(&self.conn)
             .await?;
 
-        Ok(user_model_to_user_core(row))
+        Ok(UserCore::from(row))
     }
 
     async fn create_user(&self, _user: UserCore) -> Result<(), anyhow::Error> {
         unimplemented!()
-    }
-}
-
-fn user_model_to_user_core(user: UserModel) -> UserCore {
-    UserCore {
-        id: user.id,
-        name: user.name,
-        surname: user.surname.unwrap(),
     }
 }

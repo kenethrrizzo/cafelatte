@@ -20,9 +20,9 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(move || {
         App::new()
-            .service(get_users)
-            .service(get_user_by_id)
-            .service(create_user)
+            .route("/users", web::get().to(get_users))
+            .route("/users/{user_id}", web::get().to(get_user_by_id))
+            .route("/users", web::post().to(create_user))
             .app_data(web::Data::new(user_service.clone()))
     })
     .bind(("127.0.0.1", 8080))?

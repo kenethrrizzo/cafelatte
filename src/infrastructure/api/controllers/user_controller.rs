@@ -1,5 +1,5 @@
 use crate::core::ports::user_port::IUserService;
-use actix_web::{get, post, web, HttpResponse, Responder};
+use actix_web::{web, HttpResponse, Responder};
 use serde::Serialize;
 use std::sync::Arc;
 
@@ -11,7 +11,6 @@ struct UserResponse {
     surname: String,
 }
 
-#[get("/users")]
 pub async fn get_users(user_service: UserService) -> impl Responder {
     match user_service.get_users().await {
         Ok(users) => {
@@ -23,13 +22,12 @@ pub async fn get_users(user_service: UserService) -> impl Responder {
                 });
             }
 
-            return HttpResponse::Ok().json(response);
+            HttpResponse::Ok().json(response)
         }
-        Err(_) => return HttpResponse::InternalServerError().body("Error"),
+        Err(_) => HttpResponse::InternalServerError().body("Error"),
     }
 }
 
-#[get("/users/{id}")]
 pub async fn get_user_by_id(user_service: UserService, path: web::Path<u8>) -> impl Responder {
     let user_id = path.into_inner();
 
@@ -43,7 +41,6 @@ pub async fn get_user_by_id(user_service: UserService, path: web::Path<u8>) -> i
     }
 }
 
-#[post("/users")]
 pub async fn create_user() -> impl Responder {
     HttpResponse::Created().body("create-user")
 }
