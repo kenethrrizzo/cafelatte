@@ -43,15 +43,12 @@ impl IUserRepository for UserRepository {
     async fn create_user(&self, user: UserCore) -> Result<(), anyhow::Error> {
         let user_model = UserModel::from(user);
 
-        let query = "INSERT INTO user (name, surname) VALUES ($1, $2)";
-        let last_inserted_id = sqlx::query(query)
+        let query = "INSERT INTO user (name, surname) VALUES (?, ?)";
+        sqlx::query(query)
             .bind(&user_model.name)
             .bind(&user_model.surname)
             .execute(&self.conn)
-            .await?
-            .last_insert_id();
-
-        println!("Last inserted ID: {}", last_inserted_id);
+            .await?;
 
         Ok(())
     }
