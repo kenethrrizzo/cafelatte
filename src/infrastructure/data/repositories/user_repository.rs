@@ -1,6 +1,7 @@
 use crate::core::entities::user::User as UserCore;
 use crate::core::ports::user_port::IUserRepository;
 use crate::infrastructure::data::models::user::User as UserModel;
+use anyhow::Ok;
 use async_trait::async_trait;
 use core::result::Result;
 
@@ -39,7 +40,19 @@ impl IUserRepository for UserRepository {
         Ok(UserCore::from(row))
     }
 
-    async fn create_user(&self, _user: UserCore) -> Result<(), anyhow::Error> {
-        unimplemented!()
+    async fn create_user(&self, user: UserCore) -> Result<(), anyhow::Error> {
+        let user_model = UserModel::from(user);
+
+        let query = "INSERT INTO user (name, surname) VALUES ($1, $2)";
+        let last_inserted_id = sqlx::query(query)
+            .bind(&user_model.name)
+            .bind(&user_model.surname)
+            .execute(&self.conn)
+            .await?
+            .last_insert_id();
+
+        println!("Last inserted ID: {}", last_inserted_id);
+
+        Ok(())
     }
 }

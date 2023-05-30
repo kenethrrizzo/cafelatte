@@ -36,6 +36,6 @@ where
     }
 
     async fn create_user(&self, user: User) -> Result<(), anyhow::Error> {
-        unimplemented!()
+        self.user_repository.create_user(user).await
     }
 }
