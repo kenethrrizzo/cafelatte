@@ -1,4 +1,4 @@
-use crate::core::ports::user_port::IUserService;
+use crate::core::{entities::user::User as UserCore, ports::user_port::IUserService};
 use actix_web::{web, HttpResponse, Responder};
 use serde::Serialize;
 use std::sync::Arc;
@@ -11,15 +11,21 @@ struct UserResponse {
     surname: String,
 }
 
+impl UserResponse {
+    fn from(user_core: UserCore) -> Self {
+        UserResponse {
+            name: user_core.name,
+            surname: user_core.surname,
+        }
+    }
+}
+
 pub async fn get_users(user_service: UserService) -> impl Responder {
     match user_service.get_users().await {
         Ok(users) => {
             let mut response: Vec<UserResponse> = vec![];
             for user in users {
-                response.push(UserResponse {
-                    name: user.name,
-                    surname: user.surname,
-                });
+                response.push(UserResponse::from(user));
             }
 
             HttpResponse::Ok().json(response)
@@ -32,10 +38,7 @@ pub async fn get_user_by_id(user_service: UserService, path: web::Path<u8>) -> i
     let user_id = path.into_inner();
 
     if let Ok(user) = user_service.get_user_by_id(user_id).await {
-        HttpResponse::Ok().json(UserResponse {
-            name: user.name,
-            surname: user.surname,
-        })
+        HttpResponse::Ok().json(UserResponse::from(user))
     } else {
         HttpResponse::InternalServerError().body("Error")
     }
