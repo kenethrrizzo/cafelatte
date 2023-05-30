@@ -43,8 +43,7 @@ impl IUserRepository for UserRepository {
     async fn create_user(&self, user: UserCore) -> Result<(), anyhow::Error> {
         let user_model = UserModel::from(user);
 
-        let query = "INSERT INTO user (name, surname) VALUES (?, ?)";
-        sqlx::query(query)
+        sqlx::query("INSERT INTO user (name, surname) VALUES (?, ?)")
             .bind(&user_model.name)
             .bind(&user_model.surname)
             .execute(&self.conn)
@@ -56,8 +55,7 @@ impl IUserRepository for UserRepository {
     async fn update_user(&self, user_id: i32, user: UserCore) -> Result<(), anyhow::Error> {
         let user_model = UserModel::from(user);
 
-        let query = "UPDATE user SET name=?, surname=? WHERE id=?";
-        sqlx::query(query)
+        sqlx::query("UPDATE user SET name=?, surname=? WHERE id=?")
             .bind(&user_model.name)
             .bind(&user_model.surname.unwrap_or_default())
             .bind(user_id)

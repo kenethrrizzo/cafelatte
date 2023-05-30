@@ -54,7 +54,7 @@ pub async fn update_user(
         .update_user(user_id as i32, UserRequest::to_user_core(&user_request))
         .await
     {
-        Ok(_) => HttpResponse::Created().json("User updated."),
+        Ok(_) => HttpResponse::Ok().json("User updated."),
         Err(msg) => HttpResponse::InternalServerError().body(msg.to_string()),
     }
 }
