@@ -52,4 +52,18 @@ impl IUserRepository for UserRepository {
 
         Ok(())
     }
+
+    async fn update_user(&self, user_id: i32, user: UserCore) -> Result<(), anyhow::Error> {
+        let user_model = UserModel::from(user);
+
+        let query = "UPDATE user SET name=?, surname=? WHERE id=?";
+        sqlx::query(query)
+            .bind(&user_model.name)
+            .bind(&user_model.surname.unwrap_or_default())
+            .bind(user_id)
+            .execute(&self.conn)
+            .await?;
+
+        Ok(())
+    }
 }
