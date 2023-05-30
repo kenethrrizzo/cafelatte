@@ -19,7 +19,7 @@ impl UserRepository {
 #[async_trait]
 impl IUserRepository for UserRepository {
     async fn get_users(&self) -> Result<Vec<UserCore>, anyhow::Error> {
-        let rows = sqlx::query_as::<_, UserModel>("SELECT id, name, surname FROM user")
+        let rows = sqlx::query_as::<_, UserModel>("SELECT * FROM user")
             .fetch_all(&self.conn)
             .await?;
 
