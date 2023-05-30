@@ -42,3 +42,19 @@ pub async fn create_user(
         Err(msg) => HttpResponse::InternalServerError().body(msg.to_string()),
     }
 }
+
+pub async fn update_user(
+    user_service: UserService,
+    path: web::Path<u8>,
+    user_request: web::Json<UserRequest>,
+) -> impl Responder {
+    let user_id = path.into_inner();
+
+    match user_service
+        .update_user(user_id as i32, UserRequest::to_user_core(&user_request))
+        .await
+    {
+        Ok(_) => HttpResponse::Created().json("User updated."),
+        Err(msg) => HttpResponse::InternalServerError().body(msg.to_string()),
+    }
+}
