@@ -17,17 +17,16 @@ pub async fn get_users(user_service: UserService) -> impl Responder {
 
             HttpResponse::Ok().json(response)
         }
-        Err(_) => HttpResponse::InternalServerError().body("Error"),
+        Err(msg) => HttpResponse::InternalServerError().body(msg.to_string()),
     }
 }
 
 pub async fn get_user_by_id(user_service: UserService, path: web::Path<u8>) -> impl Responder {
     let user_id = path.into_inner();
 
-    if let Ok(user) = user_service.get_user_by_id(user_id).await {
-        HttpResponse::Ok().json(UserResponse::from(user))
-    } else {
-        HttpResponse::InternalServerError().body("Error")
+    match user_service.get_user_by_id(user_id).await {
+        Ok(user) => HttpResponse::Ok().json(UserResponse::from(user)),
+        Err(msg) => HttpResponse::InternalServerError().body(msg.to_string()),
     }
 }
 
@@ -40,6 +39,6 @@ pub async fn create_user(
         .await
     {
         Ok(_) => HttpResponse::Created().json("User created."),
-        Err(_) => HttpResponse::InternalServerError().body("Error"),
+        Err(msg) => HttpResponse::InternalServerError().body(msg.to_string()),
     }
 }
