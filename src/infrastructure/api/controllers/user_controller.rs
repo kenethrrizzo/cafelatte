@@ -1,24 +1,11 @@
-use crate::core::{entities::user::User as UserCore, ports::user_port::IUserService};
+use crate::{
+    core::ports::user_port::IUserService,
+    infrastructure::api::dto::user::{UserRequest, UserResponse},
+};
 use actix_web::{web, HttpResponse, Responder};
-use serde::Serialize;
 use std::sync::Arc;
 
 type UserService = web::Data<Arc<dyn IUserService>>;
-
-#[derive(Serialize)]
-struct UserResponse {
-    name: String,
-    surname: String,
-}
-
-impl UserResponse {
-    fn from(user_core: UserCore) -> Self {
-        UserResponse {
-            name: user_core.name,
-            surname: user_core.surname,
-        }
-    }
-}
 
 pub async fn get_users(user_service: UserService) -> impl Responder {
     match user_service.get_users().await {
@@ -44,6 +31,15 @@ pub async fn get_user_by_id(user_service: UserService, path: web::Path<u8>) -> i
     }
 }
 
-pub async fn create_user() -> impl Responder {
-    HttpResponse::Created().body("create-user")
+pub async fn create_user(
+    user_service: UserService,
+    user_request: web::Json<UserRequest>,
+) -> impl Responder {
+    match user_service
+        .create_user(UserRequest::to_user_core(&user_request))
+        .await
+    {
+        Ok(_) => HttpResponse::Created().json("User created."),
+        Err(_) => HttpResponse::InternalServerError().body("Error"),
+    }
 }

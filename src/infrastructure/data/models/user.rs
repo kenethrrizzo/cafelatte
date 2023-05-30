@@ -12,7 +12,7 @@ pub struct User {
 impl User {
     pub fn from(user_core: UserCore) -> Self {
         User {
-            id: user_core.id,
+            id: user_core.id.unwrap_or_default(),
             name: user_core.name,
             surname: Some(user_core.surname),
         }
