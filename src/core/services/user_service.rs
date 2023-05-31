@@ -1,9 +1,8 @@
-use async_trait::async_trait;
-
 use crate::core::{
     entities::user::User,
     ports::user_port::{IUserRepository, IUserService},
 };
+use async_trait::async_trait;
 
 #[derive(Clone)]
 pub struct UserService<R>
@@ -11,15 +10,6 @@ where
     R: IUserRepository,
 {
     user_repository: R,
-}
-
-impl<R> UserService<R>
-where
-    R: IUserRepository,
-{
-    pub fn new(user_repository: R) -> Self {
-        UserService { user_repository }
-    }
 }
 
 #[async_trait]
@@ -41,5 +31,14 @@ where
 
     async fn update_user(&self, user_id: i32, user: User) -> Result<(), anyhow::Error> {
         self.user_repository.update_user(user_id, user).await
+    }
+}
+
+impl<R> UserService<R>
+where
+    R: IUserRepository,
+{
+    pub fn new(user_repository: R) -> Self {
+        UserService { user_repository }
     }
 }

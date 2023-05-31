@@ -10,12 +10,6 @@ pub struct UserRepository {
     pub conn: sqlx::MySqlPool,
 }
 
-impl UserRepository {
-    pub fn new(conn: sqlx::MySqlPool) -> Self {
-        UserRepository { conn }
-    }
-}
-
 #[async_trait]
 impl IUserRepository for UserRepository {
     async fn get_users(&self) -> Result<Vec<UserCore>, anyhow::Error> {
@@ -63,5 +57,11 @@ impl IUserRepository for UserRepository {
             .await?;
 
         Ok(())
+    }
+}
+
+impl UserRepository {
+    pub fn new(conn: sqlx::MySqlPool) -> Self {
+        UserRepository { conn }
     }
 }
