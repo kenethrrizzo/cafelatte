@@ -5,7 +5,9 @@ use dotenv::dotenv;
 use salvo_skeleton::{
     core::{ports::user_port::IUserService, services::user_service::UserService},
     infrastructure::{
-        api::controllers::user_controller::{create_user, get_user_by_id, get_users, update_user},
+        api::controllers::user_controller::{
+            create_user, delete_user, get_user_by_id, get_users, update_user,
+        },
         data::{mysql, repositories::user_repository::UserRepository},
     },
 };
@@ -24,6 +26,7 @@ async fn main() -> std::io::Result<()> {
             .route("/users/{user_id}", web::get().to(get_user_by_id))
             .route("/users", web::post().to(create_user))
             .route("/users/{user_id}", web::put().to(update_user))
+            .route("/user/{user_id}", web::delete().to(delete_user))
             .app_data(web::Data::new(user_service.clone()))
     })
     .bind(("127.0.0.1", 8080))?

@@ -58,3 +58,12 @@ pub async fn update_user(
         Err(msg) => HttpResponse::InternalServerError().body(msg.to_string()),
     }
 }
+
+pub async fn delete_user(user_service: UserService, path: web::Path<u8>) -> impl Responder {
+    let user_id = path.into_inner();
+
+    match user_service.delete_user(user_id as i32).await {
+        Ok(_) => HttpResponse::Ok().json("User deleted."),
+        Err(msg) => HttpResponse::InternalServerError().json(msg.to_string()),
+    }
+}

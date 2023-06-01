@@ -32,6 +32,10 @@ where
     async fn update_user(&self, user_id: i32, user: User) -> Result<(), anyhow::Error> {
         self.user_repository.update_user(user_id, user).await
     }
+
+    async fn delete_user(&self, user_id: i32) -> Result<(), anyhow::Error> {
+        self.user_repository.delete_user(user_id).await
+    }
 }
 
 impl<R> UserService<R>

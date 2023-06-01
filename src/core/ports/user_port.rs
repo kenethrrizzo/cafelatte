@@ -8,6 +8,7 @@ pub trait IUserRepository: Send + Sync {
     async fn get_user_by_id(&self, id: u8) -> Result<User, anyhow::Error>;
     async fn create_user(&self, user: User) -> Result<(), anyhow::Error>;
     async fn update_user(&self, user_id: i32, user: User) -> Result<(), anyhow::Error>;
+    async fn delete_user(&self, user_id: i32) -> Result<(), anyhow::Error>;
 }
 
 #[async_trait]
@@ -16,4 +17,5 @@ pub trait IUserService: Send + Sync {
     async fn get_user_by_id(&self, id: u8) -> Result<User, anyhow::Error>;
     async fn create_user(&self, user: User) -> Result<(), anyhow::Error>;
     async fn update_user(&self, user_id: i32, user: User) -> Result<(), anyhow::Error>;
+    async fn delete_user(&self, user_id: i32) -> Result<(), anyhow::Error>;
 }

@@ -58,6 +58,15 @@ impl IUserRepository for UserRepository {
 
         Ok(())
     }
+
+    async fn delete_user(&self, user_id: i32) -> Result<(), anyhow::Error> {
+        sqlx::query("DELETE FROM user WHERE id=?")
+            .bind(user_id)
+            .execute(&self.conn)
+            .await?;
+
+        Ok(())
+    }
 }
 
 impl UserRepository {
