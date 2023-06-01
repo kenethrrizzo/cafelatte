@@ -26,7 +26,7 @@ async fn main() -> std::io::Result<()> {
             .route("/users/{user_id}", web::get().to(get_user_by_id))
             .route("/users", web::post().to(create_user))
             .route("/users/{user_id}", web::put().to(update_user))
-            .route("/user/{user_id}", web::delete().to(delete_user))
+            .route("/users/{user_id}", web::delete().to(delete_user))
             .app_data(web::Data::new(user_service.clone()))
     })
     .bind(("127.0.0.1", 8080))?
