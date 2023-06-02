@@ -21,7 +21,15 @@ impl IUserService for UserServiceStub {
         }
     }
     async fn get_user_by_id(&self, _id: u8) -> Result<User, anyhow::Error> {
-        unimplemented!()
+        if self.success {
+            Ok(User {
+                id: Some(1),
+                name: "Keneth".to_string(),
+                surname: "Riera".to_string(),
+            })
+        } else {
+            Err(anyhow!("Error en get_users"))
+        }
     }
     async fn create_user(&self, _user: User) -> Result<(), anyhow::Error> {
         unimplemented!()

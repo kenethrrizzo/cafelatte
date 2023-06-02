@@ -73,31 +73,63 @@ mod tests {
     use super::*;
     use crate::core::ports::user_port::IUserService;
     use crate::core::services::user_service_stub::UserServiceStub;
-    use actix_web::{dev::ServiceResponse, test, web, App};
+    use actix_web::{dev::ServiceResponse, test, web, App, Route};
     use std::sync::Arc;
 
-    async fn process_tests(success: bool) -> ServiceResponse {
+    async fn process_test(
+        success: bool,
+        path: &str,
+        call_path: &str,
+        route: Route,
+    ) -> ServiceResponse {
         let user_service: Arc<dyn IUserService> = Arc::new(UserServiceStub { success });
         let app = test::init_service(
             App::new()
                 .app_data(web::Data::new(user_service.clone()))
-                .route("/users", web::get().to(get_users)),
+                .route(path, route),
         )
         .await;
 
-        let req = test::TestRequest::get().uri("/users").to_request();
+        let req = test::TestRequest::get().uri(call_path).to_request();
         test::call_service(&app, req).await
     }
 
     #[actix_web::test]
     async fn test_get_users_ok() {
-        let resp = process_tests(true).await;
+        let resp = process_test(true, "/users", "/users", web::get().to(get_users)).await;
         assert_eq!(resp.status(), actix_web::http::StatusCode::OK);
     }
 
     #[actix_web::test]
     async fn test_get_users_internal_server_error() {
-        let resp = process_tests(false).await;
+        let resp = process_test(false, "/users", "/users", web::get().to(get_users)).await;
+        assert_eq!(
+            resp.status(),
+            actix_web::http::StatusCode::INTERNAL_SERVER_ERROR
+        );
+    }
+
+    #[actix_web::test]
+    async fn test_get_user_by_id_ok() {
+        let resp = process_test(
+            true,
+            "/users/{user_id}",
+            "/users/1",
+            web::get().to(get_user_by_id),
+        )
+        .await;
+        assert_eq!(resp.status(), actix_web::http::StatusCode::OK);
+    }
+
+    #[actix_web::test]
+    async fn test_get_user_by_id_internal_server_error() {
+        let resp = process_test(
+            false,
+            "/users/{user_id}",
+            "/users/1",
+            web::get().to(get_user_by_id),
+        )
+        .await;
         assert_eq!(
             resp.status(),
             actix_web::http::StatusCode::INTERNAL_SERVER_ERROR
