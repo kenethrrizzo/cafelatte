@@ -1,13 +1,12 @@
 #[cfg(test)]
 mod tests {
-    use std::sync::Arc;
-
-    use crate::tests::core::services::user_service_stub::UserServiceStub;
     use crate::{
         core::ports::user_port::IUserService,
         infrastructure::api::controllers::user_controller::get_users,
+        tests::core::services::user_service_stub::UserServiceStub,
     };
-    use actix_web::{test, web, App};
+    use actix_web::{App, test, web};
+    use std::sync::Arc;
 
     #[actix_web::test]
     async fn test_get_users_ok() {
