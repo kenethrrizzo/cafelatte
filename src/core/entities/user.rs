@@ -1,6 +1,6 @@
 use crate::infrastructure::data::models::user::User as UserModel;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct User {
     pub id: Option<i32>,
     pub name: String,

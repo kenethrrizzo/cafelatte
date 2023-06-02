@@ -1,15 +1,24 @@
 use crate::core::{entities::user::User, ports::user_port::IUserService};
+use anyhow::anyhow;
 use async_trait::async_trait;
 
-struct UserServiceStub {}
+#[derive(Clone)]
+pub struct UserServiceStub {
+    pub success: bool,
+}
+
 #[async_trait]
 impl IUserService for UserServiceStub {
     async fn get_users(&self) -> Result<Vec<User>, anyhow::Error> {
-        Ok(vec![User {
-            id: Some(1),
-            name: "Keneth".to_string(),
-            surname: "Riera".to_string(),
-        }])
+        if self.success {
+            Ok(vec![User {
+                id: Some(1),
+                name: "Keneth".to_string(),
+                surname: "Riera".to_string(),
+            }])
+        } else {
+            Err(anyhow!("Error en get_users"))
+        }
     }
     async fn get_user_by_id(&self, _id: u8) -> Result<User, anyhow::Error> {
         unimplemented!()
