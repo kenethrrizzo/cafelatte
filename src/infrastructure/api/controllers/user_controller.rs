@@ -92,12 +92,15 @@ mod tests {
     #[actix_web::test]
     async fn test_get_users_ok() {
         let resp = process_tests(true).await;
-        assert!(resp.status().is_success());
+        assert_eq!(resp.status(), actix_web::http::StatusCode::OK);
     }
 
     #[actix_web::test]
     async fn test_get_users_internal_server_error() {
         let resp = process_tests(false).await;
-        assert!(resp.status().is_server_error());
+        assert_eq!(
+            resp.status(),
+            actix_web::http::StatusCode::INTERNAL_SERVER_ERROR
+        );
     }
 }
