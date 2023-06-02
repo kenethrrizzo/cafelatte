@@ -96,7 +96,7 @@ mod tests {
     }
 
     #[actix_web::test]
-    async fn test_get_users_not_ok() {
+    async fn test_get_users_internal_server_error() {
         let resp = process_tests(false).await;
         assert!(resp.status().is_server_error());
     }
