@@ -31,7 +31,10 @@ pub async fn get_user_by_id(user_service: UserService, path: web::Path<u8>) -> i
 }
 
 pub async fn create_user(user_service: UserService, user_request: web::Json<UserRequest>) -> impl Responder {
-    match user_service.create_user(UserRequest::to_user_core(&user_request)).await {
+    match user_service
+        .create_user(UserRequest::to_user_core(&user_request))
+        .await
+    {
         Ok(_) => HttpResponse::Created().json("User created."),
         Err(msg) => HttpResponse::InternalServerError().body(msg.to_string()),
     }
@@ -97,13 +100,25 @@ mod tests {
 
     #[actix_web::test]
     async fn test_get_user_by_id_ok() {
-        let resp = process_get_test(true, "/users/{user_id}", "/users/1", web::get().to(get_user_by_id)).await;
+        let resp = process_get_test(
+            true,
+            "/users/{user_id}",
+            "/users/1",
+            web::get().to(get_user_by_id),
+        )
+        .await;
         assert_eq!(resp.status(), actix_web::http::StatusCode::OK);
     }
 
     #[actix_web::test]
     async fn test_get_user_by_id_internal_server_error() {
-        let resp = process_get_test(false, "/users/{user_id}", "/users/1", web::get().to(get_user_by_id)).await;
+        let resp = process_get_test(
+            false,
+            "/users/{user_id}",
+            "/users/1",
+            web::get().to(get_user_by_id),
+        )
+        .await;
         assert_eq!(resp.status(), actix_web::http::StatusCode::INTERNAL_SERVER_ERROR);
     }
 
