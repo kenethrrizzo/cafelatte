@@ -5,9 +5,7 @@ use dotenv::dotenv;
 use salvo_skeleton::{
     core::{ports::user_port::IUserService, services::user_service::UserService},
     infrastructure::{
-        api::controllers::user_controller::{
-            create_user, delete_user, get_user_by_id, get_users, update_user,
-        },
+        api::controllers::user_controller::{create_user, delete_user, get_user_by_id, get_users, update_user},
         data::{mysql, repositories::user_repository::UserRepository},
     },
 };

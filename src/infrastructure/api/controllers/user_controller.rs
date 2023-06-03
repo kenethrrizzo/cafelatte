@@ -30,14 +30,8 @@ pub async fn get_user_by_id(user_service: UserService, path: web::Path<u8>) -> i
     }
 }
 
-pub async fn create_user(
-    user_service: UserService,
-    user_request: web::Json<UserRequest>,
-) -> impl Responder {
-    match user_service
-        .create_user(UserRequest::to_user_core(&user_request))
-        .await
-    {
+pub async fn create_user(user_service: UserService, user_request: web::Json<UserRequest>) -> impl Responder {
+    match user_service.create_user(UserRequest::to_user_core(&user_request)).await {
         Ok(_) => HttpResponse::Created().json("User created."),
         Err(msg) => HttpResponse::InternalServerError().body(msg.to_string()),
     }
@@ -76,12 +70,7 @@ mod tests {
     use actix_web::{dev::ServiceResponse, test, web, App, Route};
     use std::sync::Arc;
 
-    async fn process_get_test(
-        success: bool,
-        path: &str,
-        call_path: &str,
-        route: Route,
-    ) -> ServiceResponse {
+    async fn process_get_test(success: bool, path: &str, call_path: &str, route: Route) -> ServiceResponse {
         let user_service: Arc<dyn IUserService> = Arc::new(UserServiceStub { success });
         let app = test::init_service(
             App::new()
@@ -103,37 +92,19 @@ mod tests {
     #[actix_web::test]
     async fn test_get_users_internal_server_error() {
         let resp = process_get_test(false, "/users", "/users", web::get().to(get_users)).await;
-        assert_eq!(
-            resp.status(),
-            actix_web::http::StatusCode::INTERNAL_SERVER_ERROR
-        );
+        assert_eq!(resp.status(), actix_web::http::StatusCode::INTERNAL_SERVER_ERROR);
     }
 
     #[actix_web::test]
     async fn test_get_user_by_id_ok() {
-        let resp = process_get_test(
-            true,
-            "/users/{user_id}",
-            "/users/1",
-            web::get().to(get_user_by_id),
-        )
-        .await;
+        let resp = process_get_test(true, "/users/{user_id}", "/users/1", web::get().to(get_user_by_id)).await;
         assert_eq!(resp.status(), actix_web::http::StatusCode::OK);
     }
 
     #[actix_web::test]
     async fn test_get_user_by_id_internal_server_error() {
-        let resp = process_get_test(
-            false,
-            "/users/{user_id}",
-            "/users/1",
-            web::get().to(get_user_by_id),
-        )
-        .await;
-        assert_eq!(
-            resp.status(),
-            actix_web::http::StatusCode::INTERNAL_SERVER_ERROR
-        );
+        let resp = process_get_test(false, "/users/{user_id}", "/users/1", web::get().to(get_user_by_id)).await;
+        assert_eq!(resp.status(), actix_web::http::StatusCode::INTERNAL_SERVER_ERROR);
     }
 
     fn user_request_test_data() -> UserRequest {
@@ -143,12 +114,7 @@ mod tests {
         }
     }
 
-    async fn process_post_test(
-        success: bool,
-        path: &str,
-        call_path: &str,
-        route: Route,
-    ) -> ServiceResponse {
+    async fn process_post_test(success: bool, path: &str, call_path: &str, route: Route) -> ServiceResponse {
         let user_service: Arc<dyn IUserService> = Arc::new(UserServiceStub { success });
         let app = test::init_service(
             App::new()
@@ -173,18 +139,10 @@ mod tests {
     #[actix_web::test]
     async fn test_create_user_internal_server_error() {
         let resp = process_post_test(false, "/users", "/users", web::post().to(create_user)).await;
-        assert_eq!(
-            resp.status(),
-            actix_web::http::StatusCode::INTERNAL_SERVER_ERROR
-        );
+        assert_eq!(resp.status(), actix_web::http::StatusCode::INTERNAL_SERVER_ERROR);
     }
 
-    async fn process_put_test(
-        success: bool,
-        path: &str,
-        call_path: &str,
-        route: Route,
-    ) -> ServiceResponse {
+    async fn process_put_test(success: bool, path: &str, call_path: &str, route: Route) -> ServiceResponse {
         let user_service: Arc<dyn IUserService> = Arc::new(UserServiceStub { success });
         let app = test::init_service(
             App::new()
@@ -202,28 +160,13 @@ mod tests {
 
     #[actix_web::test]
     async fn test_update_user_ok() {
-        let resp = process_put_test(
-            true,
-            "/users/{user_id}",
-            "/users/1",
-            web::put().to(update_user),
-        )
-        .await;
+        let resp = process_put_test(true, "/users/{user_id}", "/users/1", web::put().to(update_user)).await;
         assert_eq!(resp.status(), actix_web::http::StatusCode::OK);
     }
 
     #[actix_web::test]
     async fn test_update_user_internal_server_error() {
-        let resp = process_put_test(
-            false,
-            "/users/{user_id}",
-            "/users/1",
-            web::put().to(update_user),
-        )
-        .await;
-        assert_eq!(
-            resp.status(),
-            actix_web::http::StatusCode::INTERNAL_SERVER_ERROR
-        );
+        let resp = process_put_test(false, "/users/{user_id}", "/users/1", web::put().to(update_user)).await;
+        assert_eq!(resp.status(), actix_web::http::StatusCode::INTERNAL_SERVER_ERROR);
     }
 }
