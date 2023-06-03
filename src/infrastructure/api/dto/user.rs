@@ -3,9 +3,9 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize)]
 pub struct UserResponse {
-    id: i32,
-    name: String,
-    surname: String,
+    pub id: i32,
+    pub name: String,
+    pub surname: String,
 }
 
 impl UserResponse {
@@ -18,10 +18,10 @@ impl UserResponse {
     }
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 pub struct UserRequest {
-    name: String,
-    surname: String,
+    pub name: String,
+    pub surname: String,
 }
 
 impl UserRequest {
