@@ -184,4 +184,46 @@ mod tests {
         let resp = process_put_test(false, "/users/{user_id}", "/users/1", web::put().to(update_user)).await;
         assert_eq!(resp.status(), actix_web::http::StatusCode::INTERNAL_SERVER_ERROR);
     }
+
+    async fn process_delete_test(
+        success: bool,
+        path: &str,
+        call_path: &str,
+        route: Route,
+    ) -> ServiceResponse {
+        let user_service: Arc<dyn IUserService> = Arc::new(UserServiceStub { success });
+        let app = test::init_service(
+            App::new()
+                .app_data(web::Data::new(user_service.clone()))
+                .route(path, route),
+        )
+        .await;
+
+        let req = test::TestRequest::delete().uri(call_path).to_request();
+        test::call_service(&app, req).await
+    }
+
+    #[actix_web::test]
+    async fn test_delete_user_ok() {
+        let resp = process_delete_test(
+            true,
+            "/users/{user_id}",
+            "/users/1",
+            web::delete().to(delete_user),
+        )
+        .await;
+        assert_eq!(resp.status(), actix_web::http::StatusCode::OK);
+    }
+
+    #[actix_web::test]
+    async fn test_delete_user_internal_server_error() {
+        let resp = process_delete_test(
+            false,
+            "/users/{user_id}",
+            "/users/1",
+            web::delete().to(delete_user),
+        )
+        .await;
+        assert_eq!(resp.status(), actix_web::http::StatusCode::INTERNAL_SERVER_ERROR);
+    }
 }
