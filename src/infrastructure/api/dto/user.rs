@@ -32,4 +32,11 @@ impl UserRequest {
             surname: self.surname.clone(),
         }
     }
+
+    pub fn dummy() -> Self {
+        UserRequest {
+            name: "Maximiliano".to_string(),
+            surname: "Riera".to_string(),
+        }
+    }
 }

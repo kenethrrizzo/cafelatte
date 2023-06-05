@@ -142,10 +142,7 @@ mod tests {
     async fn test_create_user_ok() {
         let resp = process_test(
             "/users",
-            TestRequest::post().uri("/users").set_json(UserRequest {
-                name: "Maximiliano".to_string(),
-                surname: "Riera".to_string(),
-            }),
+            TestRequest::post().uri("/users").set_json(UserRequest::dummy()),
             web::post().to(create_user),
             true,
         )
@@ -157,10 +154,7 @@ mod tests {
     async fn test_create_user_internal_server_error() {
         let resp = process_test(
             "/users",
-            TestRequest::post().uri("/users").set_json(UserRequest {
-                name: "Maximiliano".to_string(),
-                surname: "Riera".to_string(),
-            }),
+            TestRequest::post().uri("/users").set_json(UserRequest::dummy()),
             web::post().to(create_user),
             false,
         )
@@ -172,10 +166,7 @@ mod tests {
     async fn test_update_user_ok() {
         let resp = process_test(
             "/users/{user_id}",
-            TestRequest::put().uri("/users/1").set_json(UserRequest {
-                name: "Maximiliano".to_string(),
-                surname: "Riera".to_string(),
-            }),
+            TestRequest::put().uri("/users/1").set_json(UserRequest::dummy()),
             web::put().to(update_user),
             true,
         )
@@ -187,10 +178,7 @@ mod tests {
     async fn test_update_user_internal_server_error() {
         let resp = process_test(
             "/users/{user_id}",
-            TestRequest::put().uri("/users/1").set_json(UserRequest {
-                name: "Maximiliano".to_string(),
-                surname: "Riera".to_string(),
-            }),
+            TestRequest::put().uri("/users/1").set_json(UserRequest::dummy()),
             web::put().to(update_user),
             false,
         )
