@@ -73,7 +73,7 @@ mod tests {
     use actix_web::{
         dev::ServiceResponse,
         http::StatusCode,
-        test::{self, TestRequest},
+        test::{call_service, init_service, TestRequest},
         web, App, Route,
     };
     use std::sync::Arc;
@@ -81,21 +81,21 @@ mod tests {
     async fn process_test(path: &str, req: TestRequest, route: Route, success: bool) -> ServiceResponse {
         let user_service: Arc<dyn IUserService> = Arc::new(UserServiceStub { success });
 
-        let app = test::init_service(
+        let app = init_service(
             App::new()
                 .app_data(web::Data::new(user_service.clone()))
                 .route(path, route),
         )
         .await;
 
-        test::call_service(&app, req.to_request()).await
+        call_service(&app, req.to_request()).await
     }
 
     #[actix_web::test]
     async fn test_get_users_ok() {
         let resp = process_test(
             "/users",
-            test::TestRequest::get().uri("/users"),
+            TestRequest::get().uri("/users"),
             web::get().to(get_users),
             true,
         )
@@ -107,7 +107,7 @@ mod tests {
     async fn test_get_users_internal_server_error() {
         let resp = process_test(
             "/users",
-            test::TestRequest::get().uri("/users"),
+            TestRequest::get().uri("/users"),
             web::get().to(get_users),
             false,
         )
@@ -119,7 +119,7 @@ mod tests {
     async fn test_get_user_by_id_ok() {
         let resp = process_test(
             "/users/{user_id}",
-            test::TestRequest::get().uri("/users/1"),
+            TestRequest::get().uri("/users/1"),
             web::get().to(get_user_by_id),
             true,
         )
@@ -131,7 +131,7 @@ mod tests {
     async fn test_get_user_by_id_internal_server_error() {
         let resp = process_test(
             "/users/{user_id}",
-            test::TestRequest::get().uri("/users/1"),
+            TestRequest::get().uri("/users/1"),
             web::get().to(get_user_by_id),
             false,
         )
@@ -143,7 +143,7 @@ mod tests {
     async fn test_create_user_ok() {
         let resp = process_test(
             "/users",
-            test::TestRequest::post().uri("/users").set_json(UserRequest {
+            TestRequest::post().uri("/users").set_json(UserRequest {
                 name: "Maximiliano".to_string(),
                 surname: "Riera".to_string(),
             }),
@@ -158,7 +158,7 @@ mod tests {
     async fn test_create_user_internal_server_error() {
         let resp = process_test(
             "/users",
-            test::TestRequest::post().uri("/users").set_json(UserRequest {
+            TestRequest::post().uri("/users").set_json(UserRequest {
                 name: "Maximiliano".to_string(),
                 surname: "Riera".to_string(),
             }),
@@ -173,7 +173,7 @@ mod tests {
     async fn test_update_user_ok() {
         let resp = process_test(
             "/users/{user_id}",
-            test::TestRequest::put().uri("/users/1").set_json(UserRequest {
+            TestRequest::put().uri("/users/1").set_json(UserRequest {
                 name: "Maximiliano".to_string(),
                 surname: "Riera".to_string(),
             }),
@@ -188,7 +188,7 @@ mod tests {
     async fn test_update_user_internal_server_error() {
         let resp = process_test(
             "/users/{user_id}",
-            test::TestRequest::put().uri("/users/1").set_json(UserRequest {
+            TestRequest::put().uri("/users/1").set_json(UserRequest {
                 name: "Maximiliano".to_string(),
                 surname: "Riera".to_string(),
             }),
@@ -203,7 +203,7 @@ mod tests {
     async fn test_delete_user_ok() {
         let resp = process_test(
             "/users/{user_id}",
-            test::TestRequest::delete().uri("/users/1"),
+            TestRequest::delete().uri("/users/1"),
             web::delete().to(delete_user),
             true,
         )
@@ -215,7 +215,7 @@ mod tests {
     async fn test_delete_user_internal_server_error() {
         let resp = process_test(
             "/users/{user_id}",
-            test::TestRequest::delete().uri("/users/1"),
+            TestRequest::delete().uri("/users/1"),
             web::delete().to(delete_user),
             false,
         )
