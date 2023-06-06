@@ -68,14 +68,13 @@ pub async fn delete_user(user_service: UserService, path: web::Path<u8>) -> impl
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::core::{ports::user_port::IUserService, services::user_service_stub::UserServiceStub};
+    use crate::core::services::user_service_stub::UserServiceStub;
     use actix_web::{
         dev::ServiceResponse,
         http::StatusCode,
         test::{call_service, init_service, TestRequest},
         web, App, Route,
     };
-    use std::sync::Arc;
 
     async fn process_test(path: &str, req: TestRequest, route: Route, success: bool) -> ServiceResponse {
         let user_service: Arc<dyn IUserService> = Arc::new(UserServiceStub { success });
