@@ -1,6 +1,7 @@
-use crate::core::entities::user::User as UserCore;
-use crate::core::ports::user_port::IUserRepository;
-use crate::infrastructure::data::models::user::User as UserModel;
+use crate::{
+    core::entities::user::User as UserCore, core::ports::user_port::IUserRepository,
+    infrastructure::data::models::user::User as UserModel,
+};
 use async_trait::async_trait;
 use core::result::Result;
 use std::error::Error;
