@@ -3,6 +3,7 @@ use crate::core::{
     ports::user_port::{IUserRepository, IUserService},
 };
 use async_trait::async_trait;
+use std::error::Error;
 
 #[derive(Clone)]
 pub struct UserService<R>
@@ -17,23 +18,23 @@ impl<R> IUserService for UserService<R>
 where
     R: IUserRepository,
 {
-    async fn get_users(&self) -> Result<Vec<User>, anyhow::Error> {
+    async fn get_users(&self) -> Result<Vec<User>, Box<dyn Error>> {
         self.user_repository.get_users().await
     }
 
-    async fn get_user_by_id(&self, id: u8) -> Result<User, anyhow::Error> {
+    async fn get_user_by_id(&self, id: u8) -> Result<User, Box<dyn Error>> {
         self.user_repository.get_user_by_id(id).await
     }
 
-    async fn create_user(&self, user: User) -> Result<(), anyhow::Error> {
+    async fn create_user(&self, user: User) -> Result<(), Box<dyn Error>> {
         self.user_repository.create_user(user).await
     }
 
-    async fn update_user(&self, user_id: i32, user: User) -> Result<(), anyhow::Error> {
+    async fn update_user(&self, user_id: i32, user: User) -> Result<(), Box<dyn Error>> {
         self.user_repository.update_user(user_id, user).await
     }
 
-    async fn delete_user(&self, user_id: i32) -> Result<(), anyhow::Error> {
+    async fn delete_user(&self, user_id: i32) -> Result<(), Box<dyn Error>> {
         self.user_repository.delete_user(user_id).await
     }
 }
