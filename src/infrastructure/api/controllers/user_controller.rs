@@ -1,5 +1,5 @@
 use crate::{
-    core::ports::user_port::IUserService,
+    core::{errors::user_errors::UserError, ports::user_port::IUserService},
     infrastructure::api::dto::user::{UserRequest, UserResponse},
 };
 use actix_web::{web, HttpResponse, Responder};
@@ -26,7 +26,10 @@ pub async fn get_user_by_id(user_service: UserService, path: web::Path<u8>) -> i
 
     match user_service.get_user_by_id(user_id).await {
         Ok(user) => HttpResponse::Ok().json(UserResponse::from(user)),
-        Err(msg) => HttpResponse::InternalServerError().body(msg.to_string()),
+        Err(err) => match &err {
+            UserError::NotFound => HttpResponse::NotFound().body(err.to_string()),
+            _ => HttpResponse::InternalServerError().body(err.to_string()),
+        },
     }
 }
 
