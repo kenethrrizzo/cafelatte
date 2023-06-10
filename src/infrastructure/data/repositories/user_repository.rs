@@ -1,10 +1,11 @@
 use crate::{
-    core::entities::user::User as UserCore, core::ports::user_port::IUserRepository,
+    core::entities::user::User as UserCore,
+    core::{errors::user_errors::UserError, ports::user_port::IUserRepository},
     infrastructure::data::models::user::User as UserModel,
 };
 use async_trait::async_trait;
 use core::result::Result;
-use std::error::Error;
+use sqlx::Error;
 
 #[derive(Clone)]
 pub struct UserRepository {
@@ -13,60 +14,89 @@ pub struct UserRepository {
 
 #[async_trait]
 impl IUserRepository for UserRepository {
-    async fn get_users(&self) -> Result<Vec<UserCore>, Box<dyn Error>> {
-        let rows = sqlx::query_as::<_, UserModel>("SELECT * FROM user")
+    async fn get_users(&self) -> Result<Vec<UserCore>, UserError> {
+        let result = sqlx::query_as::<_, UserModel>("SELECT * FROM user")
             .fetch_all(&self.conn)
-            .await?;
+            .await;
 
-        let mut users: Vec<UserCore> = Vec::new();
-        for row in &rows {
-            users.push(UserCore::from(row.clone()));
+        match result {
+            Ok(rows) => {
+                let mut users: Vec<UserCore> = Vec::new();
+                for row in &rows {
+                    users.push(UserCore::from(row.clone()));
+                }
+
+                Ok(users)
+            }
+            Err(err) => match &err {
+                Error::RowNotFound => Err(UserError::NotFound),
+                _ => Err(UserError::Unexpected),
+            },
         }
-
-        Ok(users)
     }
 
-    async fn get_user_by_id(&self, id: u8) -> Result<UserCore, Box<dyn Error>> {
-        let row = sqlx::query_as::<_, UserModel>("SELECT * FROM user WHERE id=?")
+    async fn get_user_by_id(&self, id: u8) -> Result<UserCore, UserError> {
+        let result = sqlx::query_as::<_, UserModel>("SELECT * FROM user WHERE id=?")
             .bind(id)
             .fetch_one(&self.conn)
-            .await?;
+            .await;
 
-        Ok(UserCore::from(row))
+        match result {
+            Ok(row) => Ok(UserCore::from(row)),
+            Err(err) => match &err {
+                Error::RowNotFound => Err(UserError::NotFound),
+                _ => Err(UserError::Unexpected),
+            },
+        }
     }
 
-    async fn create_user(&self, user: UserCore) -> Result<(), Box<dyn Error>> {
+    async fn create_user(&self, user: UserCore) -> Result<(), UserError> {
         let user_model = UserModel::from(user);
 
-        sqlx::query("INSERT INTO user (name, surname) VALUES (?, ?)")
+        let result = sqlx::query("INSERT INTO user (name, surname) VALUES (?, ?)")
             .bind(&user_model.name)
             .bind(&user_model.surname)
             .execute(&self.conn)
-            .await?;
+            .await;
 
-        Ok(())
+        match result {
+            Ok(_) => Ok(()),
+            Err(_) => Err(UserError::Unexpected),
+        }
     }
 
-    async fn update_user(&self, user_id: i32, user: UserCore) -> Result<(), Box<dyn Error>> {
+    async fn update_user(&self, user_id: i32, user: UserCore) -> Result<(), UserError> {
         let user_model = UserModel::from(user);
 
-        sqlx::query("UPDATE user SET name=?, surname=? WHERE id=?")
+        let result = sqlx::query("UPDATE user SET name=?, surname=? WHERE id=?")
             .bind(&user_model.name)
             .bind(&user_model.surname.unwrap_or_default())
             .bind(user_id)
             .execute(&self.conn)
-            .await?;
+            .await;
 
-        Ok(())
+        match result {
+            Ok(_) => Ok(()),
+            Err(err) => match &err {
+                Error::RowNotFound => Err(UserError::NotFound),
+                _ => Err(UserError::Unexpected),
+            },
+        }
     }
 
-    async fn delete_user(&self, user_id: i32) -> Result<(), Box<dyn Error>> {
-        sqlx::query("DELETE FROM user WHERE id=?")
+    async fn delete_user(&self, user_id: i32) -> Result<(), UserError> {
+        let result = sqlx::query("DELETE FROM user WHERE id=?")
             .bind(user_id)
             .execute(&self.conn)
-            .await?;
+            .await;
 
-        Ok(())
+        match result {
+            Ok(_) => Ok(()),
+            Err(err) => match &err {
+                Error::RowNotFound => Err(UserError::NotFound),
+                _ => Err(UserError::Unexpected),
+            },
+        }
     }
 }
 

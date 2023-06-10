@@ -1,7 +1,9 @@
 use thiserror::Error;
 
 #[derive(Error, Debug)]
-pub enum UserErrors {
-    #[error("unknown error")]
-    Unknown,
+pub enum UserError {
+    #[error("user not found")]
+    NotFound,
+    #[error("unexpected error")]
+    Unexpected,
 }
