@@ -28,10 +28,7 @@ impl IUserRepository for UserRepository {
 
                 Ok(users)
             }
-            Err(err) => match &err {
-                Error::RowNotFound => Err(UserError::NotFound),
-                _ => Err(UserError::Unexpected),
-            },
+            Err(err) => Err(process_sqlx_errors(err)),
         }
     }
 
@@ -43,10 +40,7 @@ impl IUserRepository for UserRepository {
 
         match result {
             Ok(row) => Ok(UserCore::from(row)),
-            Err(err) => match &err {
-                Error::RowNotFound => Err(UserError::NotFound),
-                _ => Err(UserError::Unexpected),
-            },
+            Err(err) => Err(process_sqlx_errors(err)),
         }
     }
 
@@ -61,7 +55,7 @@ impl IUserRepository for UserRepository {
 
         match result {
             Ok(_) => Ok(()),
-            Err(_) => Err(UserError::Unexpected),
+            Err(err) => Err(process_sqlx_errors(err)),
         }
     }
 
@@ -77,10 +71,7 @@ impl IUserRepository for UserRepository {
 
         match result {
             Ok(_) => Ok(()),
-            Err(err) => match &err {
-                Error::RowNotFound => Err(UserError::NotFound),
-                _ => Err(UserError::Unexpected),
-            },
+            Err(err) => Err(process_sqlx_errors(err)),
         }
     }
 
@@ -92,11 +83,15 @@ impl IUserRepository for UserRepository {
 
         match result {
             Ok(_) => Ok(()),
-            Err(err) => match &err {
-                Error::RowNotFound => Err(UserError::NotFound),
-                _ => Err(UserError::Unexpected),
-            },
+            Err(err) => Err(process_sqlx_errors(err)),
         }
+    }
+}
+
+fn process_sqlx_errors(err: sqlx::Error) -> UserError {
+    match &err {
+        Error::RowNotFound => UserError::NotFound,
+        _ => UserError::Unexpected,
     }
 }
 
