@@ -17,7 +17,10 @@ pub async fn get_users(user_service: UserService) -> impl Responder {
 
             HttpResponse::Ok().json(response)
         }
-        Err(msg) => HttpResponse::InternalServerError().body(msg.to_string()),
+        Err(err) => match &err {
+            UserError::NotFound => HttpResponse::NotFound().body(err.to_string()),
+            _ => HttpResponse::InternalServerError().body(err.to_string()),
+        },
     }
 }
 
@@ -39,7 +42,7 @@ pub async fn create_user(user_service: UserService, user_request: web::Json<User
         .await
     {
         Ok(_) => HttpResponse::Created().json("User created."),
-        Err(msg) => HttpResponse::InternalServerError().body(msg.to_string()),
+        Err(err) => HttpResponse::InternalServerError().body(err.to_string()),
     }
 }
 
@@ -55,7 +58,10 @@ pub async fn update_user(
         .await
     {
         Ok(_) => HttpResponse::Ok().json("User updated."),
-        Err(msg) => HttpResponse::InternalServerError().body(msg.to_string()),
+        Err(err) => match &err {
+            UserError::NotFound => HttpResponse::NotFound().body(err.to_string()),
+            _ => HttpResponse::InternalServerError().body(err.to_string()),
+        },
     }
 }
 
@@ -64,7 +70,10 @@ pub async fn delete_user(user_service: UserService, path: web::Path<u8>) -> impl
 
     match user_service.delete_user(user_id as i32).await {
         Ok(_) => HttpResponse::Ok().json("User deleted."),
-        Err(msg) => HttpResponse::InternalServerError().json(msg.to_string()),
+        Err(err) => match &err {
+            UserError::NotFound => HttpResponse::NotFound().body(err.to_string()),
+            _ => HttpResponse::InternalServerError().body(err.to_string()),
+        },
     }
 }
 
@@ -79,8 +88,8 @@ mod tests {
         web, App, Route,
     };
 
-    async fn process_test(path: &str, req: TestRequest, route: Route, success: bool) -> ServiceResponse {
-        let user_service: Arc<dyn IUserService> = Arc::new(UserServiceStub { success });
+    async fn process_test(path: &str, req: TestRequest, route: Route, status_code: i32) -> ServiceResponse {
+        let user_service: Arc<dyn IUserService> = Arc::new(UserServiceStub { status_code });
 
         let app = init_service(
             App::new()
@@ -98,10 +107,22 @@ mod tests {
             "/users",
             TestRequest::get().uri("/users"),
             web::get().to(get_users),
-            true,
+            200,
         )
         .await;
         assert_eq!(resp.status(), StatusCode::OK);
+    }
+
+    #[actix_web::test]
+    async fn test_get_users_not_found_error() {
+        let resp = process_test(
+            "/users",
+            TestRequest::get().uri("/users"),
+            web::get().to(get_users),
+            404,
+        )
+        .await;
+        assert_eq!(resp.status(), StatusCode::NOT_FOUND);
     }
 
     #[actix_web::test]
@@ -110,7 +131,7 @@ mod tests {
             "/users",
             TestRequest::get().uri("/users"),
             web::get().to(get_users),
-            false,
+            500,
         )
         .await;
         assert_eq!(resp.status(), StatusCode::INTERNAL_SERVER_ERROR);
@@ -122,10 +143,22 @@ mod tests {
             "/users/{user_id}",
             TestRequest::get().uri("/users/1"),
             web::get().to(get_user_by_id),
-            true,
+            200,
         )
         .await;
         assert_eq!(resp.status(), StatusCode::OK);
+    }
+
+    #[actix_web::test]
+    async fn test_get_user_by_id_not_foud_error() {
+        let resp = process_test(
+            "/users/{user_id}",
+            TestRequest::get().uri("/users/1"),
+            web::get().to(get_user_by_id),
+            404,
+        )
+        .await;
+        assert_eq!(resp.status(), StatusCode::NOT_FOUND);
     }
 
     #[actix_web::test]
@@ -134,7 +167,7 @@ mod tests {
             "/users/{user_id}",
             TestRequest::get().uri("/users/1"),
             web::get().to(get_user_by_id),
-            false,
+            500,
         )
         .await;
         assert_eq!(resp.status(), StatusCode::INTERNAL_SERVER_ERROR);
@@ -146,7 +179,7 @@ mod tests {
             "/users",
             TestRequest::post().uri("/users").set_json(UserRequest::dummy()),
             web::post().to(create_user),
-            true,
+            200,
         )
         .await;
         assert_eq!(resp.status(), StatusCode::CREATED);
@@ -158,7 +191,7 @@ mod tests {
             "/users",
             TestRequest::post().uri("/users").set_json(UserRequest::dummy()),
             web::post().to(create_user),
-            false,
+            500,
         )
         .await;
         assert_eq!(resp.status(), StatusCode::INTERNAL_SERVER_ERROR);
@@ -170,10 +203,22 @@ mod tests {
             "/users/{user_id}",
             TestRequest::put().uri("/users/1").set_json(UserRequest::dummy()),
             web::put().to(update_user),
-            true,
+            200,
         )
         .await;
         assert_eq!(resp.status(), StatusCode::OK);
+    }
+
+    #[actix_web::test]
+    async fn test_update_user_not_found_error() {
+        let resp = process_test(
+            "/users/{user_id}",
+            TestRequest::put().uri("/users/1").set_json(UserRequest::dummy()),
+            web::put().to(update_user),
+            404,
+        )
+        .await;
+        assert_eq!(resp.status(), StatusCode::NOT_FOUND);
     }
 
     #[actix_web::test]
@@ -182,7 +227,7 @@ mod tests {
             "/users/{user_id}",
             TestRequest::put().uri("/users/1").set_json(UserRequest::dummy()),
             web::put().to(update_user),
-            false,
+            500,
         )
         .await;
         assert_eq!(resp.status(), StatusCode::INTERNAL_SERVER_ERROR);
@@ -194,10 +239,22 @@ mod tests {
             "/users/{user_id}",
             TestRequest::delete().uri("/users/1"),
             web::delete().to(delete_user),
-            true,
+            200,
         )
         .await;
         assert_eq!(resp.status(), StatusCode::OK);
+    }
+
+    #[actix_web::test]
+    async fn test_delete_user_not_found_error() {
+        let resp = process_test(
+            "/users/{user_id}",
+            TestRequest::delete().uri("/users/1"),
+            web::delete().to(delete_user),
+            404,
+        )
+        .await;
+        assert_eq!(resp.status(), StatusCode::NOT_FOUND);
     }
 
     #[actix_web::test]
@@ -206,7 +263,7 @@ mod tests {
             "/users/{user_id}",
             TestRequest::delete().uri("/users/1"),
             web::delete().to(delete_user),
-            false,
+            500,
         )
         .await;
         assert_eq!(resp.status(), StatusCode::INTERNAL_SERVER_ERROR);
