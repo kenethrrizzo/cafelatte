@@ -103,6 +103,7 @@ mod tests {
         test::{call_service, init_service, TestRequest},
         web, App, Route,
     };
+    use serde::{Deserialize, Serialize};
 
     async fn process_test(path: &str, req: TestRequest, route: Route, status_code: i32) -> ServiceResponse {
         let user_service: Arc<dyn IUserService> = Arc::new(UserServiceStub { status_code });
@@ -199,6 +200,42 @@ mod tests {
         )
         .await;
         assert_eq!(resp.status(), StatusCode::CREATED);
+    }
+
+    #[actix_web::test]
+    async fn test_create_user_bad_request_when_request_is_incomplete() {
+        let resp = process_test(
+            "/users",
+            TestRequest::post().uri("/users").set_json(UserRequest {
+                name: Some("Keneth".to_string()),
+                surname: None,
+            }),
+            web::post().to(create_user),
+            200,
+        )
+        .await;
+        assert_eq!(resp.status(), StatusCode::BAD_REQUEST);
+    }
+
+    #[actix_web::test]
+    async fn test_create_user_bad_request_when_request_has_unknown_properties() {
+        #[derive(Deserialize, Serialize)]
+        struct RequestWithUnknownProperties {
+            unknown_property: String,
+        }
+
+        let resp = process_test(
+            "/users",
+            TestRequest::post()
+                .uri("/users")
+                .set_json(RequestWithUnknownProperties {
+                    unknown_property: "Unknown".to_string(),
+                }),
+            web::post().to(create_user),
+            200,
+        )
+        .await;
+        assert_eq!(resp.status(), StatusCode::BAD_REQUEST);
     }
 
     #[actix_web::test]
