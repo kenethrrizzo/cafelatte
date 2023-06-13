@@ -20,23 +20,45 @@ impl UserResponse {
 
 #[derive(Deserialize, Serialize)]
 pub struct UserRequest {
-    pub name: String,
-    pub surname: String,
+    pub name: Option<String>,
+    pub surname: Option<String>,
 }
 
 impl UserRequest {
     pub fn to_user_core(&self) -> UserCore {
         UserCore {
             id: None,
-            name: self.name.clone(),
-            surname: self.surname.clone(),
+            name: self.name.clone().unwrap(),
+            surname: self.surname.clone().unwrap(),
+        }
+    }
+
+    pub fn is_valid(&self) -> bool {
+        self.name.is_some() && self.surname.is_some()
+    }
+
+    pub fn get_extra_fields(&self) -> Option<Vec<String>> {
+        let allowed_fields = vec!["name".to_string(), "surname".to_string()];
+
+        let mut extra_fields = vec![];
+
+        for (field, _) in serde_json::to_value(self).ok()?.as_object()?.iter() {
+            if !allowed_fields.contains(field) {
+                extra_fields.push(field.to_string());
+            }
+        }
+
+        if extra_fields.is_empty() {
+            None
+        } else {
+            Some(extra_fields)
         }
     }
 
     pub fn dummy() -> Self {
         UserRequest {
-            name: "Maximiliano".to_string(),
-            surname: "Riera".to_string(),
+            name: Some("Maximiliano".to_string()),
+            surname: Some("Riera".to_string()),
         }
     }
 }

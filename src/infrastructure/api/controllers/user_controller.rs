@@ -37,6 +37,14 @@ pub async fn get_user_by_id(user_service: UserService, path: web::Path<u8>) -> i
 }
 
 pub async fn create_user(user_service: UserService, user_request: web::Json<UserRequest>) -> impl Responder {
+    if !user_request.is_valid() {
+        return HttpResponse::BadRequest().body("Incomplete body");
+    }
+
+    if let Some(extra_fields) = user_request.get_extra_fields() {
+        return HttpResponse::BadRequest().body(format!("Invalid fields: {:?}", extra_fields));
+    }
+
     match user_service
         .create_user(UserRequest::to_user_core(&user_request))
         .await
@@ -52,6 +60,14 @@ pub async fn update_user(
     user_request: web::Json<UserRequest>,
 ) -> impl Responder {
     let user_id = path.into_inner();
+
+    if !user_request.is_valid() {
+        return HttpResponse::BadRequest().body("Incomplete body");
+    }
+
+    if let Some(extra_fields) = user_request.get_extra_fields() {
+        return HttpResponse::BadRequest().body(format!("Invalid fields: {:?}", extra_fields));
+    }
 
     match user_service
         .update_user(user_id as i32, UserRequest::to_user_core(&user_request))
