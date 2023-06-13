@@ -37,24 +37,6 @@ impl UserRequest {
         self.name.is_some() && self.surname.is_some()
     }
 
-    pub fn get_extra_fields(&self) -> Option<Vec<String>> {
-        let allowed_fields = vec!["name".to_string(), "surname".to_string()];
-
-        let mut extra_fields = vec![];
-
-        for (field, _) in serde_json::to_value(self).ok()?.as_object()?.iter() {
-            if !allowed_fields.contains(field) {
-                extra_fields.push(field.to_string());
-            }
-        }
-
-        if extra_fields.is_empty() {
-            None
-        } else {
-            Some(extra_fields)
-        }
-    }
-
     pub fn dummy() -> Self {
         UserRequest {
             name: Some("Maximiliano".to_string()),

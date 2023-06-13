@@ -41,7 +41,7 @@ pub async fn create_user(user_service: UserService, user_request: web::Json<User
         return HttpResponse::BadRequest().body("Incomplete body");
     }
 
-    if let Some(extra_fields) = user_request.get_extra_fields() {
+    if let Some(extra_fields) = get_extra_fields(&user_request) {
         return HttpResponse::BadRequest().body(format!("Invalid fields: {:?}", extra_fields));
     }
 
@@ -65,7 +65,7 @@ pub async fn update_user(
         return HttpResponse::BadRequest().body("Incomplete body");
     }
 
-    if let Some(extra_fields) = user_request.get_extra_fields() {
+    if let Some(extra_fields) = get_extra_fields(&user_request) {
         return HttpResponse::BadRequest().body(format!("Invalid fields: {:?}", extra_fields));
     }
 
@@ -90,6 +90,24 @@ pub async fn delete_user(user_service: UserService, path: web::Path<u8>) -> impl
             UserError::NotFound => HttpResponse::NotFound().body(err.to_string()),
             _ => HttpResponse::InternalServerError().body(err.to_string()),
         },
+    }
+}
+
+fn get_extra_fields(user_request: &UserRequest) -> Option<Vec<String>> {
+    let allowed_fields = vec!["name".to_string(), "surname".to_string()];
+
+    let mut extra_fields = vec![];
+
+    for (field, _) in serde_json::to_value(user_request).ok()?.as_object()?.iter() {
+        if !allowed_fields.contains(field) {
+            extra_fields.push(field.to_string());
+        }
+    }
+
+    if extra_fields.is_empty() {
+        None
+    } else {
+        Some(extra_fields)
     }
 }
 
