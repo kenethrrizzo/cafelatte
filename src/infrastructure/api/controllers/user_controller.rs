@@ -41,10 +41,6 @@ pub async fn create_user(user_service: UserService, user_request: web::Json<User
         return HttpResponse::BadRequest().body("Incomplete body");
     }
 
-    if let Some(extra_fields) = get_extra_fields(&user_request) {
-        return HttpResponse::BadRequest().body(format!("Invalid fields: {:?}", extra_fields));
-    }
-
     match user_service
         .create_user(UserRequest::to_user_core(&user_request))
         .await
@@ -63,10 +59,6 @@ pub async fn update_user(
 
     if !user_request.is_valid() {
         return HttpResponse::BadRequest().body("Incomplete body");
-    }
-
-    if let Some(extra_fields) = get_extra_fields(&user_request) {
-        return HttpResponse::BadRequest().body(format!("Invalid fields: {:?}", extra_fields));
     }
 
     match user_service
@@ -93,24 +85,6 @@ pub async fn delete_user(user_service: UserService, path: web::Path<u8>) -> impl
     }
 }
 
-fn get_extra_fields(user_request: &UserRequest) -> Option<Vec<String>> {
-    let allowed_fields = vec!["name".to_string(), "surname".to_string()];
-
-    let mut extra_fields = vec![];
-
-    for (field, _) in serde_json::to_value(user_request).ok()?.as_object()?.iter() {
-        if !allowed_fields.contains(field) {
-            extra_fields.push(field.to_string());
-        }
-    }
-
-    if extra_fields.is_empty() {
-        None
-    } else {
-        Some(extra_fields)
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -121,7 +95,6 @@ mod tests {
         test::{call_service, init_service, TestRequest},
         web, App, Route,
     };
-    use serde::{Deserialize, Serialize};
 
     async fn process_test(path: &str, req: TestRequest, route: Route, status_code: i32) -> ServiceResponse {
         let user_service: Arc<dyn IUserService> = Arc::new(UserServiceStub { status_code });
@@ -228,27 +201,6 @@ mod tests {
                 name: Some("Keneth".to_string()),
                 surname: None,
             }),
-            web::post().to(create_user),
-            200,
-        )
-        .await;
-        assert_eq!(resp.status(), StatusCode::BAD_REQUEST);
-    }
-
-    #[actix_web::test]
-    async fn test_create_user_bad_request_when_request_has_unknown_properties() {
-        #[derive(Deserialize, Serialize)]
-        struct RequestWithUnknownProperties {
-            unknown_property: String,
-        }
-
-        let resp = process_test(
-            "/users",
-            TestRequest::post()
-                .uri("/users")
-                .set_json(RequestWithUnknownProperties {
-                    unknown_property: "Unknown".to_string(),
-                }),
             web::post().to(create_user),
             200,
         )
