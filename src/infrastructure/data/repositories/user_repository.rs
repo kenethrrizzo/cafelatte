@@ -88,7 +88,7 @@ impl IUserRepository for UserRepository {
     }
 }
 
-fn process_sqlx_errors(err: sqlx::Error) -> UserError {
+fn process_sqlx_errors(err: Error) -> UserError {
     match &err {
         Error::RowNotFound => UserError::NotFound,
         _ => UserError::Unexpected,
