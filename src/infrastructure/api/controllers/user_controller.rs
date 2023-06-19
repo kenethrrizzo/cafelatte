@@ -38,7 +38,7 @@ pub async fn get_user_by_id(user_service: UserService, path: web::Path<u8>) -> i
 
 pub async fn create_user(user_service: UserService, user_request: web::Json<UserRequest>) -> impl Responder {
     if !user_request.is_valid() {
-        return HttpResponse::BadRequest().body("Incomplete body");
+        return HttpResponse::BadRequest().body("Incomplete body.");
     }
 
     match user_service
@@ -58,7 +58,7 @@ pub async fn update_user(
     let user_id = path.into_inner();
 
     if !user_request.is_valid() {
-        return HttpResponse::BadRequest().body("Incomplete body");
+        return HttpResponse::BadRequest().body("Incomplete body.");
     }
 
     match user_service
