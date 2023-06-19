@@ -28,13 +28,13 @@ impl IUserRepository for UserRepository {
 
                 Ok(users)
             }
-            Err(err) => {
-                log::error!("SQLx error: {:?}", err);
-                match &err {
-                    Error::RowNotFound => Err(UserError::NotFound),
-                    _ => Err(UserError::Unexpected),
+            Err(err) => match &err {
+                Error::RowNotFound => Err(UserError::NotFound),
+                _ => {
+                    log::error!("SQLx error: {:?}", err);
+                    Err(UserError::Unexpected)
                 }
-            }
+            },
         }
     }
 
@@ -46,13 +46,13 @@ impl IUserRepository for UserRepository {
 
         match result {
             Ok(row) => Ok(UserCore::from(row)),
-            Err(err) => {
-                log::error!("SQLx error: {:?}", err);
-                match &err {
-                    Error::RowNotFound => Err(UserError::NotFound),
-                    _ => Err(UserError::Unexpected),
+            Err(err) => match &err {
+                Error::RowNotFound => Err(UserError::NotFound),
+                _ => {
+                    log::error!("SQLx error: {:?}", err);
+                    Err(UserError::Unexpected)
                 }
-            }
+            },
         }
     }
 
@@ -86,13 +86,13 @@ impl IUserRepository for UserRepository {
 
         match result {
             Ok(_) => Ok(()),
-            Err(err) => {
-                log::error!("SQLx error: {:?}", err);
-                match &err {
-                    Error::RowNotFound => Err(UserError::NotFound),
-                    _ => Err(UserError::Unexpected),
+            Err(err) => match &err {
+                Error::RowNotFound => Err(UserError::NotFound),
+                _ => {
+                    log::error!("SQLx error: {:?}", err);
+                    Err(UserError::Unexpected)
                 }
-            }
+            },
         }
     }
 
@@ -104,13 +104,13 @@ impl IUserRepository for UserRepository {
 
         match result {
             Ok(_) => Ok(()),
-            Err(err) => {
-                log::error!("SQLx error: {:?}", err);
-                match &err {
-                    Error::RowNotFound => Err(UserError::NotFound),
-                    _ => Err(UserError::Unexpected),
+            Err(err) => match &err {
+                Error::RowNotFound => Err(UserError::NotFound),
+                _ => {
+                    log::error!("SQLx error: {:?}", err);
+                    Err(UserError::Unexpected)
                 }
-            }
+            },
         }
     }
 }
