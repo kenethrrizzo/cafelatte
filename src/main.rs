@@ -16,7 +16,7 @@ use std::{io::Result, sync::Arc};
 async fn main() -> Result<()> {
     dotenv().ok();
 
-    env_logger::init_from_env(Env::default().default_filter_or("info"));
+    env_logger::init_from_env(Env::default().default_filter_or("debug"));
 
     let conn = mysql::connect_to_database().await.unwrap();
     let user_repo = UserRepository::new(conn);

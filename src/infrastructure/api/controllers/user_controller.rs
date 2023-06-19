@@ -18,8 +18,14 @@ pub async fn get_users(user_service: UserService) -> impl Responder {
             HttpResponse::Ok().json(response)
         }
         Err(err) => match &err {
-            UserError::NotFound => HttpResponse::NotFound().body(err.to_string()),
-            _ => HttpResponse::InternalServerError().body(err.to_string()),
+            UserError::NotFound => {
+                log::error!("No existen usuarios");
+                HttpResponse::NotFound().body(err.to_string())
+            }
+            _ => {
+                log::error!("Ha ocurrido un error inesperado: {:?}", err);
+                HttpResponse::InternalServerError().body(err.to_string())
+            }
         },
     }
 }
@@ -30,8 +36,14 @@ pub async fn get_user_by_id(user_service: UserService, path: web::Path<u8>) -> i
     match user_service.get_user_by_id(user_id).await {
         Ok(user) => HttpResponse::Ok().json(UserResponse::from(user)),
         Err(err) => match &err {
-            UserError::NotFound => HttpResponse::NotFound().body(err.to_string()),
-            _ => HttpResponse::InternalServerError().body(err.to_string()),
+            UserError::NotFound => {
+                log::error!("Usuario con ID <{:?}> no encontrado", user_id);
+                HttpResponse::NotFound().body(err.to_string())
+            }
+            _ => {
+                log::error!("Ha ocurrido un error inesperado: {:?}", err);
+                HttpResponse::InternalServerError().body(err.to_string())
+            }
         },
     }
 }
@@ -46,7 +58,10 @@ pub async fn create_user(user_service: UserService, user_request: web::Json<User
         .await
     {
         Ok(_) => HttpResponse::Created().json("User created."),
-        Err(err) => HttpResponse::InternalServerError().body(err.to_string()),
+        Err(err) => {
+            log::error!("Ha ocurrido un error inesperado: {:?}", err);
+            HttpResponse::InternalServerError().body(err.to_string())
+        }
     }
 }
 
@@ -68,7 +83,10 @@ pub async fn update_user(
         Ok(_) => HttpResponse::Ok().json("User updated."),
         Err(err) => match &err {
             UserError::NotFound => HttpResponse::NotFound().body(err.to_string()),
-            _ => HttpResponse::InternalServerError().body(err.to_string()),
+            _ => {
+                log::error!("Ha ocurrido un error inesperado: {:?}", err);
+                HttpResponse::InternalServerError().body(err.to_string())
+            }
         },
     }
 }
@@ -80,7 +98,10 @@ pub async fn delete_user(user_service: UserService, path: web::Path<u8>) -> impl
         Ok(_) => HttpResponse::Ok().json("User deleted."),
         Err(err) => match &err {
             UserError::NotFound => HttpResponse::NotFound().body(err.to_string()),
-            _ => HttpResponse::InternalServerError().body(err.to_string()),
+            _ => {
+                log::error!("Ha ocurrido un error inesperado: {:?}", err);
+                HttpResponse::InternalServerError().body(err.to_string())
+            }
         },
     }
 }
