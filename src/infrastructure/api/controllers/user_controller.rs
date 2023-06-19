@@ -19,7 +19,7 @@ pub async fn get_users(user_service: UserService) -> impl Responder {
         }
         Err(err) => match &err {
             UserError::NotFound => {
-                log::error!("No existen usuarios: {:?}", err);
+                log::error!("{:?}: no se ha encontrado ningún usuario", err);
                 HttpResponse::NotFound().body(err.to_string())
             }
             _ => {
