@@ -28,7 +28,13 @@ impl IUserRepository for UserRepository {
 
                 Ok(users)
             }
-            Err(err) => Err(process_sqlx_errors(err)),
+            Err(err) => {
+                log::error!("SQLx error: {:?}", err);
+                match &err {
+                    Error::RowNotFound => Err(UserError::NotFound),
+                    _ => Err(UserError::Unexpected),
+                }
+            }
         }
     }
 
@@ -40,7 +46,13 @@ impl IUserRepository for UserRepository {
 
         match result {
             Ok(row) => Ok(UserCore::from(row)),
-            Err(err) => Err(process_sqlx_errors(err)),
+            Err(err) => {
+                log::error!("SQLx error: {:?}", err);
+                match &err {
+                    Error::RowNotFound => Err(UserError::NotFound),
+                    _ => Err(UserError::Unexpected),
+                }
+            }
         }
     }
 
@@ -55,7 +67,10 @@ impl IUserRepository for UserRepository {
 
         match result {
             Ok(_) => Ok(()),
-            Err(err) => Err(process_sqlx_errors(err)),
+            Err(err) => {
+                log::error!("SQLx error: {:?}", err);
+                Err(UserError::Unexpected)
+            }
         }
     }
 
@@ -71,7 +86,13 @@ impl IUserRepository for UserRepository {
 
         match result {
             Ok(_) => Ok(()),
-            Err(err) => Err(process_sqlx_errors(err)),
+            Err(err) => {
+                log::error!("SQLx error: {:?}", err);
+                match &err {
+                    Error::RowNotFound => Err(UserError::NotFound),
+                    _ => Err(UserError::Unexpected),
+                }
+            }
         }
     }
 
@@ -83,16 +104,14 @@ impl IUserRepository for UserRepository {
 
         match result {
             Ok(_) => Ok(()),
-            Err(err) => Err(process_sqlx_errors(err)),
+            Err(err) => {
+                log::error!("SQLx error: {:?}", err);
+                match &err {
+                    Error::RowNotFound => Err(UserError::NotFound),
+                    _ => Err(UserError::Unexpected),
+                }
+            }
         }
-    }
-}
-
-fn process_sqlx_errors(err: Error) -> UserError {
-    log::error!("SQLx error: {:?}", err);
-    match &err {
-        Error::RowNotFound => UserError::NotFound,
-        _ => UserError::Unexpected,
     }
 }
 
