@@ -10,10 +10,10 @@ use salvo_skeleton::{
         data::{mysql, repositories::user_repository::UserRepository},
     },
 };
-use std::sync::Arc;
+use std::{io::Result, sync::Arc};
 
 #[actix_web::main]
-async fn main() -> std::io::Result<()> {
+async fn main() -> Result<()> {
     dotenv().ok();
 
     env_logger::init_from_env(Env::default().default_filter_or("info"));
