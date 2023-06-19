@@ -1,6 +1,6 @@
 use crate::{
     core::{errors::user_errors::UserError, ports::user_port::IUserService},
-    infrastructure::api::dto::user::{UserRequest, UserResponse},
+    infrastructure::api::dto::{user_request::UserRequest, user_response::UserResponse},
 };
 use actix_web::{web, HttpResponse, Responder};
 use std::sync::Arc;
