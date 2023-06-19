@@ -19,7 +19,7 @@ pub async fn get_users(user_service: UserService) -> impl Responder {
         }
         Err(err) => match &err {
             UserError::NotFound => {
-                log::error!("No existen usuarios");
+                log::error!("No existen usuarios: {:?}", err);
                 HttpResponse::NotFound().body(err.to_string())
             }
             _ => {
@@ -37,7 +37,7 @@ pub async fn get_user_by_id(user_service: UserService, path: web::Path<u8>) -> i
         Ok(user) => HttpResponse::Ok().json(UserResponse::from(user)),
         Err(err) => match &err {
             UserError::NotFound => {
-                log::error!("Usuario con ID <{:?}> no encontrado", user_id);
+                log::error!("Usuario con ID <{:?}> no encontrado: {:?}", user_id, err);
                 HttpResponse::NotFound().body(err.to_string())
             }
             _ => {

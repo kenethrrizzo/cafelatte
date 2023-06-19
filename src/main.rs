@@ -10,18 +10,22 @@ use salvo_skeleton::{
         data::{mysql, repositories::user_repository::UserRepository},
     },
 };
-use std::{io::Result, sync::Arc};
+use std::{env, io::Result, sync::Arc};
 
 #[actix_web::main]
 async fn main() -> Result<()> {
-    dotenv().ok();
-
     env_logger::init_from_env(Env::default().default_filter_or("debug"));
 
+    log::info!("Loading environment variables...");
+    dotenv().ok();
+
+    log::info!("Connecting to database...");
     let conn = mysql::connect_to_database().await.unwrap();
     let user_repo = UserRepository::new(conn);
     let user_service: Arc<dyn IUserService> = Arc::new(UserService::new(user_repo));
 
+    let server_port = env::var("SERVER_PORT").unwrap().parse::<u16>().unwrap();
+    log::info!("Listening server on port: {:?}", server_port);
     HttpServer::new(move || {
         App::new()
             .wrap(Logger::default())
@@ -33,7 +37,7 @@ async fn main() -> Result<()> {
             .route("/users/{user_id}", web::delete().to(delete_user))
             .app_data(web::Data::new(user_service.clone()))
     })
-    .bind(("127.0.0.1", 8080))?
+    .bind(("127.0.0.1", server_port))?
     .run()
     .await
 }
