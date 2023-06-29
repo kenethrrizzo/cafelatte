@@ -1,8 +1,7 @@
-use crate::{
-    core::entities::user::User as UserCore,
-    core::{errors::user_errors::UserError, ports::user_port::IUserRepository},
-    infrastructure::data::models::user::User as UserModel,
+use crate::core::{
+    entities::user::User as UserCore, errors::user_errors::UserError, ports::user_port::IUserRepository,
 };
+use crate::infrastructure::data::models::user::User as UserModel;
 
 #[derive(Clone)]
 pub struct UserRepository {
