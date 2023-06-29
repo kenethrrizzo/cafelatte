@@ -1,11 +1,8 @@
-use crate::{
-    core::{errors::user_errors::UserError, ports::user_port::IUserService},
-    infrastructure::api::dto::{user_request::UserRequest, user_response::UserResponse},
-};
+use crate::core::{errors::user_errors::UserError, ports::user_port::IUserService};
+use crate::infrastructure::api::dto::{user_request::UserRequest, user_response::UserResponse};
 use actix_web::{web, HttpResponse, Responder};
-use std::sync::Arc;
 
-type UserService = web::Data<Arc<dyn IUserService>>;
+type UserService = web::Data<std::sync::Arc<dyn IUserService>>;
 
 pub async fn get_users(user_service: UserService) -> impl Responder {
     match user_service.get_users().await {
@@ -132,7 +129,8 @@ mod tests {
     };
 
     async fn process_test(path: &str, req: TestRequest, route: Route, status_code: i32) -> ServiceResponse {
-        let user_service: Arc<dyn IUserService> = Arc::new(UserServiceStub { status_code });
+        let user_service: std::sync::Arc<dyn IUserService> =
+            std::sync::Arc::new(UserServiceStub { status_code });
 
         let app = init_service(
             App::new()
