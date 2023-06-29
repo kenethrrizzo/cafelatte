@@ -3,18 +3,15 @@ use crate::{
     core::{errors::user_errors::UserError, ports::user_port::IUserRepository},
     infrastructure::data::models::user::User as UserModel,
 };
-use async_trait::async_trait;
-use core::result::Result;
-use sqlx::Error;
 
 #[derive(Clone)]
 pub struct UserRepository {
     pub conn: sqlx::MySqlPool,
 }
 
-#[async_trait]
+#[async_trait::async_trait]
 impl IUserRepository for UserRepository {
-    async fn get_users(&self) -> Result<Vec<UserCore>, UserError> {
+    async fn get_users(&self) -> core::result::Result<Vec<UserCore>, UserError> {
         let result = sqlx::query_as::<_, UserModel>("SELECT * FROM user")
             .fetch_all(&self.conn)
             .await;
@@ -29,7 +26,7 @@ impl IUserRepository for UserRepository {
                 Ok(users)
             }
             Err(err) => match &err {
-                Error::RowNotFound => Err(UserError::NotFound),
+                sqlx::Error::RowNotFound => Err(UserError::NotFound),
                 _ => {
                     log::error!("SQLx error: {:?}", err);
                     Err(UserError::Unexpected)
@@ -38,7 +35,7 @@ impl IUserRepository for UserRepository {
         }
     }
 
-    async fn get_user_by_id(&self, id: u8) -> Result<UserCore, UserError> {
+    async fn get_user_by_id(&self, id: u8) -> core::result::Result<UserCore, UserError> {
         let result = sqlx::query_as::<_, UserModel>("SELECT * FROM user WHERE id=?")
             .bind(id)
             .fetch_one(&self.conn)
@@ -47,7 +44,7 @@ impl IUserRepository for UserRepository {
         match result {
             Ok(row) => Ok(UserCore::from(row)),
             Err(err) => match &err {
-                Error::RowNotFound => Err(UserError::NotFound),
+                sqlx::Error::RowNotFound => Err(UserError::NotFound),
                 _ => {
                     log::error!("SQLx error: {:?}", err);
                     Err(UserError::Unexpected)
@@ -56,7 +53,7 @@ impl IUserRepository for UserRepository {
         }
     }
 
-    async fn create_user(&self, user: UserCore) -> Result<(), UserError> {
+    async fn create_user(&self, user: UserCore) -> core::result::Result<(), UserError> {
         let user_model = UserModel::from(user);
 
         let result = sqlx::query("INSERT INTO user (name, surname) VALUES (?, ?)")
@@ -74,7 +71,7 @@ impl IUserRepository for UserRepository {
         }
     }
 
-    async fn update_user(&self, user_id: i32, user: UserCore) -> Result<(), UserError> {
+    async fn update_user(&self, user_id: i32, user: UserCore) -> core::result::Result<(), UserError> {
         let user_model = UserModel::from(user);
 
         let result = sqlx::query("UPDATE user SET name=?, surname=? WHERE id=?")
@@ -87,7 +84,7 @@ impl IUserRepository for UserRepository {
         match result {
             Ok(_) => Ok(()),
             Err(err) => match &err {
-                Error::RowNotFound => Err(UserError::NotFound),
+                sqlx::Error::RowNotFound => Err(UserError::NotFound),
                 _ => {
                     log::error!("SQLx error: {:?}", err);
                     Err(UserError::Unexpected)
@@ -96,7 +93,7 @@ impl IUserRepository for UserRepository {
         }
     }
 
-    async fn delete_user(&self, user_id: i32) -> Result<(), UserError> {
+    async fn delete_user(&self, user_id: i32) -> core::result::Result<(), UserError> {
         let result = sqlx::query("DELETE FROM user WHERE id=?")
             .bind(user_id)
             .execute(&self.conn)
@@ -105,7 +102,7 @@ impl IUserRepository for UserRepository {
         match result {
             Ok(_) => Ok(()),
             Err(err) => match &err {
-                Error::RowNotFound => Err(UserError::NotFound),
+                sqlx::Error::RowNotFound => Err(UserError::NotFound),
                 _ => {
                     log::error!("SQLx error: {:?}", err);
                     Err(UserError::Unexpected)
