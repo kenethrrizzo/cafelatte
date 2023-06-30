@@ -117,6 +117,19 @@ pub async fn delete_user(user_service: UserService, path: web::Path<u8>) -> impl
     }
 }
 
+/// Función que retorna la suma de dos números.
+///
+/// Recibe dos parámetros de tipo i32, los cuales se suman y
+/// se retornan en la función.
+///
+/// ```
+/// let result = salvo_skeleton::infrastructure::api::handlers::user_handler::add(2, 3);
+/// assert_eq!(result, 5);
+/// ```
+pub fn add(a: i32, b: i32) -> i32 {
+    a + b
+}
+
 #[cfg(test)]
 mod user_handler_tests {
     use super::*;
