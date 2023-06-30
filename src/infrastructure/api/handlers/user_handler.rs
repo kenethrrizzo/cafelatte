@@ -118,7 +118,7 @@ pub async fn delete_user(user_service: UserService, path: web::Path<u8>) -> impl
 }
 
 #[cfg(test)]
-mod tests {
+mod user_handler_tests {
     use super::*;
     use crate::core::services::user_service_stub::UserServiceStub;
     use actix_web::{
