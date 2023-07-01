@@ -4,7 +4,10 @@ use env_logger::Env;
 use salvo_skeleton::{
     core::{ports::user_port::IUserService, services::user_service::UserService},
     infrastructure::{
-        api::handlers::user_handler::{create_user, delete_user, get_user_by_id, get_users, update_user},
+        api::{
+            handlers::user_handler::{create_user, delete_user, get_user_by_id, get_users, update_user},
+            middlewares::auth_middleware::AuthenticateMiddlewareFactory,
+        },
         data::{mysql, repositories::user_repository::UserRepository},
     },
 };
@@ -26,6 +29,7 @@ async fn main() -> Result<()> {
     log::info!("Listening server on port: {:?}", server_port);
     HttpServer::new(move || {
         App::new()
+            .wrap(AuthenticateMiddlewareFactory::new())
             .wrap(Logger::default())
             .wrap(Logger::new("%a %{User-Agent}i"))
             .route("/users", web::get().to(get_users))
