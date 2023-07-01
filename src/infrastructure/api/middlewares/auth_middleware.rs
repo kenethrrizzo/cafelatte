@@ -3,10 +3,7 @@ use actix_web::{
     dev::{Service, ServiceRequest, ServiceResponse},
     Error,
 };
-use futures::{
-    future::{ready, LocalBoxFuture, Ready},
-    FutureExt,
-};
+use futures::future::{ready, LocalBoxFuture, Ready};
 use std::rc::Rc;
 
 pub struct AuthenticateMiddleware<S> {
@@ -26,14 +23,13 @@ where
     fn call(&self, req: ServiceRequest) -> Self::Future {
         let srv = self.service.clone();
 
-        async move {
+        futures::FutureExt::boxed_local(async move {
             log::debug!("Antes de la ejecución del handler.");
             let res = srv.call(req).await?;
             log::debug!("Después de la ejecución del handler.");
 
             Ok(res)
-        }
-        .boxed_local()
+        })
     }
 }
 
