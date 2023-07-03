@@ -49,11 +49,15 @@ impl IUserRepository for UserRepository {
     async fn create_user(&self, user: UserCore) -> core::result::Result<(), UserError> {
         let user_model = UserModel::from_user_core(user);
 
-        let result = sqlx::query("INSERT INTO user (name, surname) VALUES (?, ?)")
-            .bind(&user_model.name)
-            .bind(&user_model.surname)
-            .execute(&self.conn)
-            .await;
+        let result = sqlx::query(
+            "INSERT INTO user (name, surname, phone_number, email, password) VALUES (?,?,?,?,?)",
+        )
+        .bind(&user_model.name)
+        .bind(&user_model.surname)
+        .bind(&user_model.phone_number.unwrap_or_default())
+        .bind(&user_model.email)
+        .execute(&self.conn)
+        .await;
 
         match result {
             Ok(_) => Ok(()),
