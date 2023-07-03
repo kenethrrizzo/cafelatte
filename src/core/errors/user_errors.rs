@@ -2,10 +2,10 @@ use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum UserError {
-    #[error("user_not_found_error")]
+    #[error("User not found.")]
     NotFound,
-    #[error("user_unauthorized")]
+    #[error("Unauthorized user.")]
     Unauthorized,
-    #[error("unexpected_error")]
+    #[error("An unexpected error has occurred.")]
     Unexpected,
 }
