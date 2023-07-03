@@ -32,7 +32,7 @@ impl IUserRepository for UserRepository {
                 Ok(UserCore::from_user_model(user_model))
             }
             Err(err) => {
-                log::error!("SQLx error: {:?}", err);
+                log::error!("{:?}", err);
                 Err(UserError::Unexpected)
             }
         }
@@ -49,7 +49,7 @@ impl IUserRepository for UserRepository {
             Err(err) => match &err {
                 sqlx::Error::RowNotFound => Err(UserError::NotFound),
                 _ => {
-                    log::error!("SQLx error: {:?}", err);
+                    log::error!("{:?}", err);
                     Err(UserError::Unexpected)
                 }
             },
@@ -66,7 +66,7 @@ impl IUserRepository for UserRepository {
             Err(err) => match &err {
                 sqlx::Error::RowNotFound => Err(UserError::NotFound),
                 _ => {
-                    log::error!("SQLx error: {:?}", err);
+                    log::error!("{:?}", err);
                     Err(UserError::Unexpected)
                 }
             },
@@ -84,7 +84,7 @@ impl IUserRepository for UserRepository {
             Err(err) => match &err {
                 sqlx::Error::RowNotFound => Err(UserError::NotFound),
                 _ => {
-                    log::error!("SQLx error: {:?}", err);
+                    log::error!("{:?}", err);
                     Err(UserError::Unexpected)
                 }
             },
@@ -113,7 +113,7 @@ impl IUserRepository for UserRepository {
             Err(err) => match &err {
                 sqlx::Error::RowNotFound => Err(UserError::NotFound),
                 _ => {
-                    log::error!("SQLx error: {:?}", err);
+                    log::error!("{:?}", err);
                     Err(UserError::Unexpected)
                 }
             },
@@ -131,7 +131,7 @@ impl IUserRepository for UserRepository {
             Err(err) => match &err {
                 sqlx::Error::RowNotFound => Err(UserError::NotFound),
                 _ => {
-                    log::error!("SQLx error: {:?}", err);
+                    log::error!("{:?}", err);
                     Err(UserError::Unexpected)
                 }
             },
