@@ -24,25 +24,25 @@ where
         let cypted_password = crypt_password(&user.password);
         user.set_password(cypted_password);
 
-        let mut login_response = Login::new();
+        let mut login = Login::new();
 
         match self.user_repository.register(user).await {
             Ok(user) => {
-                login_response.set_user(user.clone());
+                login.set_user(user.clone());
 
                 let payload = UserPayload::new(user.id.unwrap(), user.name, user.surname);
                 let token = create_jwt_token(payload);
 
-                login_response.set_token(token);
+                login.set_token(token);
 
-                Ok(login_response)
+                Ok(login)
             }
             Err(_) => Err(UserError::Unauthorized),
         }
     }
 
     async fn login(&self, email: String, password: String) -> Result<Login, UserError> {
-        let mut login_response = Login::new();
+        let mut login = Login::new();
 
         match self.user_repository.login(email).await {
             Ok(user) => {
@@ -50,14 +50,14 @@ where
                     return Err(UserError::Unauthorized);
                 }
 
-                login_response.set_user(user.clone());
+                login.set_user(user.clone());
 
                 let payload = UserPayload::new(user.id.unwrap(), user.name, user.surname);
                 let token = create_jwt_token(payload);
 
-                login_response.set_token(token);
+                login.set_token(token);
 
-                Ok(login_response)
+                Ok(login)
             }
             Err(_) => Err(UserError::Unauthorized),
         }
