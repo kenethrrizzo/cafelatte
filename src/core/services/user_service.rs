@@ -26,7 +26,7 @@ where
 
         let mut login = Login::new();
 
-        match self.user_repository.register(user).await {
+        match self.user_repository.insert_user(user).await {
             Ok(user) => {
                 login.set_user(user.clone());
 
@@ -44,7 +44,7 @@ where
     async fn login(&self, email: String, password: String) -> Result<Login, UserError> {
         let mut login = Login::new();
 
-        match self.user_repository.login(email).await {
+        match self.user_repository.get_user_by_email(email).await {
             Ok(user) => {
                 if !verify_password(password, &user.password) {
                     return Err(UserError::Unauthorized);

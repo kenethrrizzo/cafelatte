@@ -11,7 +11,7 @@ pub struct UserRepository {
 
 #[async_trait::async_trait]
 impl IUserRepository for UserRepository {
-    async fn register(&self, user: UserCore) -> core::result::Result<UserCore, UserError> {
+    async fn insert_user(&self, user: UserCore) -> core::result::Result<UserCore, UserError> {
         let mut user_model = UserModel::from_user_core(user);
 
         let result = sqlx::query(
@@ -38,7 +38,7 @@ impl IUserRepository for UserRepository {
         }
     }
 
-    async fn login(&self, email: String) -> Result<UserCore, UserError> {
+    async fn get_user_by_email(&self, email: String) -> Result<UserCore, UserError> {
         let result = sqlx::query_as::<_, UserModel>("SELECT * FROM user WHERE email=?")
             .bind(email)
             .fetch_one(&self.conn)
