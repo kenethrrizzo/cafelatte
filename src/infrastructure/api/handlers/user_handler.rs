@@ -42,7 +42,7 @@ pub async fn get_user_by_id(user_service: UserService, path: web::Path<u8>) -> i
     }
 }
 
-pub async fn create_user(
+pub async fn register(
     user_service: UserService,
     user_request: web::Json<UserRequest>,
 ) -> impl Responder {
@@ -51,7 +51,7 @@ pub async fn create_user(
     }
 
     match user_service
-        .create_user(UserRequest::to_user_core(&user_request))
+        .register(UserRequest::to_user_core(&user_request))
         .await
     {
         Ok(_) => HttpResponse::Created().json("User created."),
@@ -111,19 +111,6 @@ pub async fn delete_user(user_service: UserService, path: web::Path<u8>) -> impl
             }
         },
     }
-}
-
-/// Función que retorna la suma de dos números.
-///
-/// Recibe dos parámetros de tipo i32, los cuales se suman y
-/// se retornan en la función.
-///
-/// ```
-/// let result = salvo_skeleton::infrastructure::api::handlers::user_handler::add(2, 3);
-/// assert_eq!(result, 5);
-/// ```
-pub fn add(a: i32, b: i32) -> i32 {
-    a + b
 }
 
 #[cfg(test)]
@@ -229,13 +216,13 @@ mod user_handler_tests {
     }
 
     #[actix_web::test]
-    async fn test_create_user_ok() {
+    async fn test_register_ok() {
         let resp = process_test(
             "/users",
             TestRequest::post()
                 .uri("/users")
                 .set_json(UserRequest::dummy()),
-            web::post().to(create_user),
+            web::post().to(register),
             200,
         )
         .await;
@@ -243,7 +230,7 @@ mod user_handler_tests {
     }
 
     #[actix_web::test]
-    async fn test_create_user_bad_request_when_request_is_not_valid() {
+    async fn test_register_bad_request_when_request_is_not_valid() {
         let resp = process_test(
             "/users",
             TestRequest::post().uri("/users").set_json(UserRequest {
@@ -253,7 +240,7 @@ mod user_handler_tests {
                 email: "anything".to_string(),
                 password: "nasd8hj819".to_string(),
             }),
-            web::post().to(create_user),
+            web::post().to(register),
             200,
         )
         .await;
@@ -261,13 +248,13 @@ mod user_handler_tests {
     }
 
     #[actix_web::test]
-    async fn test_create_user_internal_server_error() {
+    async fn test_register_internal_server_error() {
         let resp = process_test(
             "/users",
             TestRequest::post()
                 .uri("/users")
                 .set_json(UserRequest::dummy()),
-            web::post().to(create_user),
+            web::post().to(register),
             500,
         )
         .await;

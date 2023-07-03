@@ -44,7 +44,7 @@ impl IUserService for UserServiceStub {
         }
     }
 
-    async fn create_user(&self, _user: User) -> Result<(), UserError> {
+    async fn register(&self, _user: User) -> Result<(), UserError> {
         if self.status_code == 200 {
             Ok(())
         } else {

@@ -30,4 +30,8 @@ impl User {
 
         users
     }
+
+    pub fn set_password(&mut self, password: String) {
+        self.password = password;
+    }
 }

@@ -6,7 +6,7 @@ use salvo_skeleton::{
     infrastructure::{
         api::{
             handlers::user_handler::{
-                create_user, delete_user, get_user_by_id, get_users, update_user,
+                delete_user, get_user_by_id, get_users, register, update_user,
             },
             middlewares::auth_middleware::AuthenticateMiddlewareFactory,
         },
@@ -36,7 +36,7 @@ async fn main() -> Result<()> {
             .wrap(Logger::new("%a %{User-Agent}i"))
             .route("/users", web::get().to(get_users))
             .route("/users/{user_id}", web::get().to(get_user_by_id))
-            .route("/users", web::post().to(create_user))
+            .route("/users/register", web::post().to(register))
             .route("/users/{user_id}", web::put().to(update_user))
             .route("/users/{user_id}", web::delete().to(delete_user))
             .app_data(web::Data::new(user_service.clone()))

@@ -46,7 +46,7 @@ impl IUserRepository for UserRepository {
         }
     }
 
-    async fn create_user(&self, user: UserCore) -> core::result::Result<(), UserError> {
+    async fn register(&self, user: UserCore) -> core::result::Result<(), UserError> {
         let user_model = UserModel::from_user_core(user);
 
         let result = sqlx::query(
