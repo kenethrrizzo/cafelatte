@@ -71,13 +71,15 @@ impl IUserRepository for UserRepository {
     ) -> core::result::Result<(), UserError> {
         let user_model = UserModel::from_user_core(user);
 
-        // TODO: Actualizar todos los campos.
-        let result = sqlx::query("UPDATE user SET name=?, surname=? WHERE id=?")
-            .bind(&user_model.name)
-            .bind(&user_model.surname)
-            .bind(user_id)
-            .execute(&self.conn)
-            .await;
+        let result =
+            sqlx::query("UPDATE user SET name=?, surname=?, phone_number=?, email=? WHERE id=?")
+                .bind(&user_model.name)
+                .bind(&user_model.surname)
+                .bind(&user_model.phone_number.unwrap_or_default())
+                .bind(&user_model.email)
+                .bind(user_id)
+                .execute(&self.conn)
+                .await;
 
         match result {
             Ok(_) => Ok(()),
