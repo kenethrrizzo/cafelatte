@@ -6,14 +6,7 @@ type UserService = web::Data<std::sync::Arc<dyn IUserService>>;
 
 pub async fn get_users(user_service: UserService) -> impl Responder {
     match user_service.get_users().await {
-        Ok(users) => {
-            let mut response: Vec<UserResponse> = vec![];
-            for user in users {
-                response.push(UserResponse::from(user));
-            }
-
-            HttpResponse::Ok().json(response)
-        }
+        Ok(users) => HttpResponse::Ok().json(UserResponse::from_user_core_vec(users)),
         Err(err) => match &err {
             UserError::NotFound => {
                 log::error!("{:?}: no se ha encontrado ningún usuario", err.to_string());
@@ -31,7 +24,7 @@ pub async fn get_user_by_id(user_service: UserService, path: web::Path<u8>) -> i
     let user_id = path.into_inner();
 
     match user_service.get_user_by_id(user_id).await {
-        Ok(user) => HttpResponse::Ok().json(UserResponse::from(user)),
+        Ok(user) => HttpResponse::Ok().json(UserResponse::from_user_core(user)),
         Err(err) => match &err {
             UserError::NotFound => {
                 log::error!(
@@ -49,9 +42,12 @@ pub async fn get_user_by_id(user_service: UserService, path: web::Path<u8>) -> i
     }
 }
 
-pub async fn create_user(user_service: UserService, user_request: web::Json<UserRequest>) -> impl Responder {
+pub async fn create_user(
+    user_service: UserService,
+    user_request: web::Json<UserRequest>,
+) -> impl Responder {
     if !user_request.is_valid() {
-        return HttpResponse::BadRequest().body("Incomplete body.");
+        return HttpResponse::BadRequest().body("Invalid fields.");
     }
 
     match user_service
@@ -74,7 +70,7 @@ pub async fn update_user(
     let user_id = path.into_inner();
 
     if !user_request.is_valid() {
-        return HttpResponse::BadRequest().body("Incomplete body.");
+        return HttpResponse::BadRequest().body("Invalid fields.");
     }
 
     match user_service
@@ -141,7 +137,12 @@ mod user_handler_tests {
         web, App, Route,
     };
 
-    async fn process_test(path: &str, req: TestRequest, route: Route, status_code: i32) -> ServiceResponse {
+    async fn process_test(
+        path: &str,
+        req: TestRequest,
+        route: Route,
+        status_code: i32,
+    ) -> ServiceResponse {
         let user_service: std::sync::Arc<dyn IUserService> =
             std::sync::Arc::new(UserServiceStub { status_code });
 
@@ -231,7 +232,9 @@ mod user_handler_tests {
     async fn test_create_user_ok() {
         let resp = process_test(
             "/users",
-            TestRequest::post().uri("/users").set_json(UserRequest::dummy()),
+            TestRequest::post()
+                .uri("/users")
+                .set_json(UserRequest::dummy()),
             web::post().to(create_user),
             200,
         )
@@ -240,12 +243,15 @@ mod user_handler_tests {
     }
 
     #[actix_web::test]
-    async fn test_create_user_bad_request_when_request_is_incomplete() {
+    async fn test_create_user_bad_request_when_request_is_not_valid() {
         let resp = process_test(
             "/users",
             TestRequest::post().uri("/users").set_json(UserRequest {
-                name: Some("Keneth".to_string()),
-                surname: None,
+                name: "Keneth".to_string(),
+                surname: "None".to_string(),
+                phone_number: None,
+                email: "anything".to_string(),
+                password: "nasd8hj819".to_string(),
             }),
             web::post().to(create_user),
             200,
@@ -258,7 +264,9 @@ mod user_handler_tests {
     async fn test_create_user_internal_server_error() {
         let resp = process_test(
             "/users",
-            TestRequest::post().uri("/users").set_json(UserRequest::dummy()),
+            TestRequest::post()
+                .uri("/users")
+                .set_json(UserRequest::dummy()),
             web::post().to(create_user),
             500,
         )
@@ -270,7 +278,9 @@ mod user_handler_tests {
     async fn test_update_user_ok() {
         let resp = process_test(
             "/users/{user_id}",
-            TestRequest::put().uri("/users/1").set_json(UserRequest::dummy()),
+            TestRequest::put()
+                .uri("/users/1")
+                .set_json(UserRequest::dummy()),
             web::put().to(update_user),
             200,
         )
@@ -282,7 +292,9 @@ mod user_handler_tests {
     async fn test_update_user_not_found_error() {
         let resp = process_test(
             "/users/{user_id}",
-            TestRequest::put().uri("/users/1").set_json(UserRequest::dummy()),
+            TestRequest::put()
+                .uri("/users/1")
+                .set_json(UserRequest::dummy()),
             web::put().to(update_user),
             404,
         )
@@ -294,7 +306,9 @@ mod user_handler_tests {
     async fn test_update_user_internal_server_error() {
         let resp = process_test(
             "/users/{user_id}",
-            TestRequest::put().uri("/users/1").set_json(UserRequest::dummy()),
+            TestRequest::put()
+                .uri("/users/1")
+                .set_json(UserRequest::dummy()),
             web::put().to(update_user),
             500,
         )

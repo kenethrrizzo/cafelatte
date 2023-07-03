@@ -5,7 +5,9 @@ use salvo_skeleton::{
     core::{ports::user_port::IUserService, services::user_service::UserService},
     infrastructure::{
         api::{
-            handlers::user_handler::{create_user, delete_user, get_user_by_id, get_users, update_user},
+            handlers::user_handler::{
+                create_user, delete_user, get_user_by_id, get_users, update_user,
+            },
             middlewares::auth_middleware::AuthenticateMiddlewareFactory,
         },
         data::{mysql, repositories::user_repository::UserRepository},

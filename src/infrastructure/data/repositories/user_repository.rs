@@ -1,5 +1,6 @@
 use crate::core::{
-    entities::user::User as UserCore, errors::user_errors::UserError, ports::user_port::IUserRepository,
+    entities::user::User as UserCore, errors::user_errors::UserError,
+    ports::user_port::IUserRepository,
 };
 use crate::infrastructure::data::models::user::User as UserModel;
 
@@ -16,14 +17,7 @@ impl IUserRepository for UserRepository {
             .await;
 
         match result {
-            Ok(rows) => {
-                let mut users: Vec<UserCore> = Vec::new();
-                for row in &rows {
-                    users.push(UserCore::from(row.clone()));
-                }
-
-                Ok(users)
-            }
+            Ok(rows) => Ok(UserCore::from_user_model_vec(rows)),
             Err(err) => match &err {
                 sqlx::Error::RowNotFound => Err(UserError::NotFound),
                 _ => {
@@ -41,7 +35,7 @@ impl IUserRepository for UserRepository {
             .await;
 
         match result {
-            Ok(row) => Ok(UserCore::from(row)),
+            Ok(row) => Ok(UserCore::from_user_model(row)),
             Err(err) => match &err {
                 sqlx::Error::RowNotFound => Err(UserError::NotFound),
                 _ => {
@@ -53,7 +47,7 @@ impl IUserRepository for UserRepository {
     }
 
     async fn create_user(&self, user: UserCore) -> core::result::Result<(), UserError> {
-        let user_model = UserModel::from(user);
+        let user_model = UserModel::from_user_core(user);
 
         let result = sqlx::query("INSERT INTO user (name, surname) VALUES (?, ?)")
             .bind(&user_model.name)
@@ -70,12 +64,17 @@ impl IUserRepository for UserRepository {
         }
     }
 
-    async fn update_user(&self, user_id: i32, user: UserCore) -> core::result::Result<(), UserError> {
-        let user_model = UserModel::from(user);
+    async fn update_user(
+        &self,
+        user_id: i32,
+        user: UserCore,
+    ) -> core::result::Result<(), UserError> {
+        let user_model = UserModel::from_user_core(user);
 
+        // TODO: Actualizar todos los campos.
         let result = sqlx::query("UPDATE user SET name=?, surname=? WHERE id=?")
             .bind(&user_model.name)
-            .bind(&user_model.surname.unwrap_or_default())
+            .bind(&user_model.surname)
             .bind(user_id)
             .execute(&self.conn)
             .await;

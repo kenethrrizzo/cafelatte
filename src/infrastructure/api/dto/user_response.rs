@@ -4,16 +4,27 @@ use serde::Serialize;
 #[derive(Serialize)]
 pub struct UserResponse {
     pub id: i32,
-    pub name: String,
-    pub surname: String,
+    pub complete_name: String,
 }
 
 impl UserResponse {
-    pub fn from(user_core: UserCore) -> Self {
+    pub fn from_user_core(user: UserCore) -> Self {
+        let mut complete_name = user.name;
+        complete_name.push_str(" ");
+        complete_name.push_str(user.surname.as_str());
+
         UserResponse {
-            id: user_core.id.unwrap_or_default(),
-            name: user_core.name,
-            surname: user_core.surname,
+            id: user.id.unwrap_or_default(),
+            complete_name,
         }
+    }
+
+    pub fn from_user_core_vec(users: Vec<UserCore>) -> Vec<Self> {
+        let mut response: Vec<UserResponse> = vec![];
+        for user in users {
+            response.push(UserResponse::from_user_core(user));
+        }
+
+        response
     }
 }

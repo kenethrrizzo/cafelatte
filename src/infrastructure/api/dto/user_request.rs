@@ -3,27 +3,36 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize)]
 pub struct UserRequest {
-    pub name: Option<String>,
-    pub surname: Option<String>,
+    pub name: String,
+    pub surname: String,
+    pub phone_number: Option<String>,
+    pub email: String,
+    pub password: String,
 }
 
 impl UserRequest {
     pub fn to_user_core(&self) -> UserCore {
         UserCore {
             id: None,
-            name: self.name.clone().unwrap(),
-            surname: self.surname.clone().unwrap(),
+            name: self.name.clone(),
+            surname: self.surname.clone(),
+            phone_number: self.phone_number.clone(),
+            email: self.email.clone(),
+            password: self.password.clone(),
         }
     }
 
     pub fn is_valid(&self) -> bool {
-        self.name.is_some() && self.surname.is_some()
+        self.email.contains("@")
     }
 
     pub fn dummy() -> Self {
         UserRequest {
-            name: Some("Maximiliano".to_string()),
-            surname: Some("Riera".to_string()),
+            name: "Maximiliano".to_string(),
+            surname: "Riera".to_string(),
+            phone_number: Some("0988059308".to_string()),
+            email: "maximiliano@gmail.com".to_string(),
+            password: "oas98y8dn".to_string(),
         }
     }
 }

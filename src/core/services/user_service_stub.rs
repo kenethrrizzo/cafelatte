@@ -1,4 +1,6 @@
-use crate::core::{entities::user::User, errors::user_errors::UserError, ports::user_port::IUserService};
+use crate::core::{
+    entities::user::User, errors::user_errors::UserError, ports::user_port::IUserService,
+};
 use async_trait::async_trait;
 
 #[derive(Clone)]
@@ -14,6 +16,9 @@ impl IUserService for UserServiceStub {
                 id: Some(1),
                 name: "Keneth".to_string(),
                 surname: "Riera".to_string(),
+                phone_number: Some("0988059308".to_string()),
+                email: "kenethriera@gmail.com".to_string(),
+                password: "password".to_string(),
             }])
         } else if self.status_code == 404 {
             Err(UserError::NotFound)
@@ -28,6 +33,9 @@ impl IUserService for UserServiceStub {
                 id: Some(1),
                 name: "Keneth".to_string(),
                 surname: "Riera".to_string(),
+                phone_number: Some("0988059308".to_string()),
+                email: "kenethriera@gmail.com".to_string(),
+                password: "password".to_string(),
             })
         } else if self.status_code == 404 {
             Err(UserError::NotFound)
