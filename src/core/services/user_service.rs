@@ -1,10 +1,10 @@
 use crate::{
     core::{
-        entities::user::User,
+        entities::{login::Login, user::User, user_payload::UserPayload},
         errors::user_errors::UserError,
         ports::user_port::{IUserRepository, IUserService},
     },
-    utils::security_util::crypt_password,
+    utils::security_util::{create_jwt_token, crypt_password, verify_password},
 };
 
 #[derive(Clone)]
@@ -20,19 +20,55 @@ impl<R> IUserService for UserService<R>
 where
     R: IUserRepository,
 {
+    async fn register(&self, mut user: User) -> Result<Login, UserError> {
+        let cypted_password = crypt_password(&user.password);
+        user.set_password(cypted_password);
+
+        let mut login_response = Login::new();
+
+        match self.user_repository.register(user).await {
+            Ok(user) => {
+                login_response.set_user(user.clone());
+
+                let payload = UserPayload::new(user.id.unwrap(), user.name, user.surname);
+                let token = create_jwt_token(payload);
+
+                login_response.set_token(token);
+
+                Ok(login_response)
+            }
+            Err(_) => Err(UserError::Unauthorized),
+        }
+    }
+
+    async fn login(&self, email: String, password: String) -> Result<Login, UserError> {
+        let mut login_response = Login::new();
+
+        match self.user_repository.login(email).await {
+            Ok(user) => {
+                if !verify_password(password, &user.password) {
+                    return Err(UserError::Unauthorized);
+                }
+
+                login_response.set_user(user.clone());
+
+                let payload = UserPayload::new(user.id.unwrap(), user.name, user.surname);
+                let token = create_jwt_token(payload);
+
+                login_response.set_token(token);
+
+                Ok(login_response)
+            }
+            Err(_) => Err(UserError::Unauthorized),
+        }
+    }
+
     async fn get_users(&self) -> Result<Vec<User>, UserError> {
         self.user_repository.get_users().await
     }
 
     async fn get_user_by_id(&self, id: u8) -> Result<User, UserError> {
         self.user_repository.get_user_by_id(id).await
-    }
-
-    async fn register(&self, mut user: User) -> Result<(), UserError> {
-        let cypted_password = crypt_password(&user.password);
-        user.set_password(cypted_password);
-
-        self.user_repository.register(user).await
     }
 
     async fn update_user(&self, user_id: i32, user: User) -> Result<(), UserError> {

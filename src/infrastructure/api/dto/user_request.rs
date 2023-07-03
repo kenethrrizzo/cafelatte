@@ -36,3 +36,23 @@ impl UserRequest {
         }
     }
 }
+
+#[derive(Deserialize, Serialize)]
+pub struct LoginRequest {
+    email: String,
+    password: String,
+}
+
+impl LoginRequest {
+    pub fn get_email(&self) -> String {
+        self.email.clone()
+    }
+
+    pub fn get_password(&self) -> String {
+        self.password.clone()
+    }
+
+    pub fn is_valid(&self) -> bool {
+        self.email.contains("@")
+    }
+}

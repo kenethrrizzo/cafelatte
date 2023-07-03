@@ -11,6 +11,17 @@ pub struct User {
 }
 
 impl User {
+    pub fn new() -> User {
+        User {
+            id: None,
+            name: "".to_string(),
+            surname: "".to_string(),
+            phone_number: None,
+            email: "".to_string(),
+            password: "".to_string(),
+        }
+    }
+
     pub fn from_user_model(row: UserModel) -> Self {
         User {
             id: row.id,

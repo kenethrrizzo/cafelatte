@@ -1,10 +1,14 @@
-use crate::core::{entities::user::User, errors::user_errors::UserError};
+use crate::core::{
+    entities::{login::Login, user::User},
+    errors::user_errors::UserError,
+};
 use async_trait::async_trait;
 use core::result::Result;
 
 #[async_trait]
 pub trait IUserRepository: Send + Sync {
-    async fn register(&self, user: User) -> Result<(), UserError>;
+    async fn register(&self, user: User) -> Result<User, UserError>;
+    async fn login(&self, email: String) -> Result<User, UserError>;
 
     async fn get_users(&self) -> Result<Vec<User>, UserError>;
     async fn get_user_by_id(&self, id: u8) -> Result<User, UserError>;
@@ -14,7 +18,8 @@ pub trait IUserRepository: Send + Sync {
 
 #[async_trait]
 pub trait IUserService: Send + Sync {
-    async fn register(&self, user: User) -> Result<(), UserError>;
+    async fn register(&self, user: User) -> Result<Login, UserError>;
+    async fn login(&self, email: String, password: String) -> Result<Login, UserError>;
 
     async fn get_users(&self) -> Result<Vec<User>, UserError>;
     async fn get_user_by_id(&self, id: u8) -> Result<User, UserError>;

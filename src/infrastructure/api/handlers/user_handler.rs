@@ -1,8 +1,50 @@
 use crate::core::{errors::user_errors::UserError, ports::user_port::IUserService};
+use crate::infrastructure::api::dto::user_request::LoginRequest;
+use crate::infrastructure::api::dto::user_response::LoginResponse;
 use crate::infrastructure::api::dto::{user_request::UserRequest, user_response::UserResponse};
 use actix_web::{web, HttpResponse, Responder};
 
 type UserService = web::Data<std::sync::Arc<dyn IUserService>>;
+
+pub async fn register(
+    user_service: UserService,
+    user_request: web::Json<UserRequest>,
+) -> impl Responder {
+    if !user_request.is_valid() {
+        return HttpResponse::BadRequest().body("Invalid fields.");
+    }
+
+    match user_service
+        .register(UserRequest::to_user_core(&user_request))
+        .await
+    {
+        Ok(res) => HttpResponse::Created().json(LoginResponse::from_login(res)),
+        Err(err) => {
+            log::error!("{:?}: ha ocurrido un error inesperado", err.to_string());
+            HttpResponse::InternalServerError().body(err.to_string())
+        }
+    }
+}
+
+pub async fn login(
+    user_service: UserService,
+    login_request: web::Json<LoginRequest>,
+) -> impl Responder {
+    if !login_request.is_valid() {
+        return HttpResponse::BadRequest().body("Invalid fields.");
+    }
+
+    match user_service
+        .login(login_request.get_email(), login_request.get_password())
+        .await
+    {
+        Ok(res) => HttpResponse::Ok().json(LoginResponse::from_login(res)),
+        Err(err) => {
+            log::error!("{:?}: ha ocurrido un error inesperado", err.to_string());
+            HttpResponse::InternalServerError().body(err.to_string())
+        }
+    }
+}
 
 pub async fn get_users(user_service: UserService) -> impl Responder {
     match user_service.get_users().await {
@@ -39,26 +81,6 @@ pub async fn get_user_by_id(user_service: UserService, path: web::Path<u8>) -> i
                 HttpResponse::InternalServerError().body(err.to_string())
             }
         },
-    }
-}
-
-pub async fn register(
-    user_service: UserService,
-    user_request: web::Json<UserRequest>,
-) -> impl Responder {
-    if !user_request.is_valid() {
-        return HttpResponse::BadRequest().body("Invalid fields.");
-    }
-
-    match user_service
-        .register(UserRequest::to_user_core(&user_request))
-        .await
-    {
-        Ok(_) => HttpResponse::Created().json("User created."),
-        Err(err) => {
-            log::error!("{:?}: ha ocurrido un error inesperado", err.to_string());
-            HttpResponse::InternalServerError().body(err.to_string())
-        }
     }
 }
 

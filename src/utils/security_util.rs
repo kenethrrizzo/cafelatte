@@ -1,4 +1,37 @@
+use crate::core::{entities::user_payload::UserPayload, errors::user_errors::UserError};
 use bcrypt::{hash, verify};
+use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
+use std::env;
+
+pub fn create_jwt_token(payload: UserPayload) -> String {
+    let payload = serde_json::to_value(payload).unwrap();
+    let secret = env::var("JWT_SECRET").unwrap();
+    let token = encode(
+        &Header::default(),
+        &payload,
+        &EncodingKey::from_secret(secret.as_ref()),
+    )
+    .unwrap();
+
+    token
+}
+
+pub fn verify_jwt_token(token: String) -> Result<UserPayload, UserError> {
+    let secret = env::var("JWT_SECRET").unwrap();
+    match decode(
+        &token,
+        &DecodingKey::from_secret(secret.as_ref()),
+        &Validation::new(jsonwebtoken::Algorithm::HS256),
+    ) {
+        Ok(decoded_token) => {
+            let payload: serde_json::Value = decoded_token.claims;
+            let user_payload: UserPayload = serde_json::from_value(payload).unwrap();
+
+            Ok(user_payload)
+        }
+        Err(_) => Err(UserError::Unexpected),
+    }
+}
 
 /// Función que retorna una contraseña encriptada.
 ///
@@ -24,8 +57,8 @@ pub fn crypt_password(password: &String) -> String {
 /// let crypted_password = salvo_skeleton::utils::security_util::crypt_password(&password);
 /// assert_eq!(
 ///     true,
-///     salvo_skeleton::utils::security_util::verify_password(password, crypted_password));
+///     salvo_skeleton::utils::security_util::verify_password(password, &crypted_password));
 /// ```
-pub fn verify_password(password_to_verify: String, password: String) -> bool {
+pub fn verify_password(password_to_verify: String, password: &String) -> bool {
     verify(password_to_verify, &password).unwrap()
 }

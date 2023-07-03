@@ -4,6 +4,8 @@ use thiserror::Error;
 pub enum UserError {
     #[error("user_not_found_error")]
     NotFound,
+    #[error("user_unauthorized")]
+    Unauthorized,
     #[error("unexpected_error")]
     Unexpected,
 }

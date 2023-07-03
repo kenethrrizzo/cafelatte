@@ -23,4 +23,8 @@ impl User {
             password: user_core.password,
         }
     }
+
+    pub fn set_id(&mut self, id: i32) {
+        self.id = Some(id)
+    }
 }

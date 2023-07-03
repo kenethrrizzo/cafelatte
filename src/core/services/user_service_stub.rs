@@ -1,5 +1,7 @@
 use crate::core::{
-    entities::user::User, errors::user_errors::UserError, ports::user_port::IUserService,
+    entities::{login::Login, user::User},
+    errors::user_errors::UserError,
+    ports::user_port::IUserService,
 };
 use async_trait::async_trait;
 
@@ -10,6 +12,22 @@ pub struct UserServiceStub {
 
 #[async_trait]
 impl IUserService for UserServiceStub {
+    async fn register(&self, _user: User) -> Result<Login, UserError> {
+        if self.status_code == 200 {
+            Ok(Login::new())
+        } else {
+            Err(UserError::Unexpected)
+        }
+    }
+
+    async fn login(&self, _email: String, _password: String) -> Result<Login, UserError> {
+        if self.status_code == 200 {
+            Ok(Login::new())
+        } else {
+            Err(UserError::Unexpected)
+        }
+    }
+
     async fn get_users(&self) -> Result<Vec<User>, UserError> {
         if self.status_code == 200 {
             Ok(vec![User {
@@ -39,14 +57,6 @@ impl IUserService for UserServiceStub {
             })
         } else if self.status_code == 404 {
             Err(UserError::NotFound)
-        } else {
-            Err(UserError::Unexpected)
-        }
-    }
-
-    async fn register(&self, _user: User) -> Result<(), UserError> {
-        if self.status_code == 200 {
-            Ok(())
         } else {
             Err(UserError::Unexpected)
         }
