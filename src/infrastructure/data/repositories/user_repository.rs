@@ -56,6 +56,7 @@ impl IUserRepository for UserRepository {
         .bind(&user_model.surname)
         .bind(&user_model.phone_number.unwrap_or_default())
         .bind(&user_model.email)
+        .bind(&user_model.password)
         .execute(&self.conn)
         .await;
 
