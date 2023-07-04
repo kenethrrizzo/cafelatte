@@ -1,8 +1,10 @@
 use crate::{
     core::{errors::user_errors::UserError, ports::user_port::IUserService},
     infrastructure::api::{
-        dto::user_request::{LoginRequest, UserRequest},
-        dto::user_response::{LoginResponse, UserResponse},
+        dto::{
+            user_request::{LoginRequest, UserRequest},
+            user_response::{LoginResponse, UserResponse},
+        },
         middlewares::auth_middleware::AuthenticateMiddlewareFactory,
     },
 };
