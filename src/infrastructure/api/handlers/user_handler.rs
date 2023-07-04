@@ -1,8 +1,28 @@
-use crate::core::{errors::user_errors::UserError, ports::user_port::IUserService};
-use crate::infrastructure::api::dto::user_request::LoginRequest;
-use crate::infrastructure::api::dto::user_response::LoginResponse;
-use crate::infrastructure::api::dto::{user_request::UserRequest, user_response::UserResponse};
+use crate::{
+    core::{errors::user_errors::UserError, ports::user_port::IUserService},
+    infrastructure::api::{
+        dto::user_request::{LoginRequest, UserRequest},
+        dto::user_response::{LoginResponse, UserResponse},
+        middlewares::auth_middleware::AuthenticateMiddlewareFactory,
+    },
+};
 use actix_web::{web, HttpResponse, Responder};
+
+pub fn routes(cfg: &mut web::ServiceConfig) {
+    cfg.service(
+        web::scope("/users")
+            .wrap(AuthenticateMiddlewareFactory::new())
+            .route("", web::get().to(get_users))
+            .route("/{user_id}", web::get().to(get_user_by_id))
+            .route("/{user_id}", web::put().to(update_user))
+            .route("/{user_id}", web::delete().to(delete_user)),
+    )
+    .service(
+        web::scope("/authenticate")
+            .route("/register", web::post().to(register))
+            .route("/login", web::post().to(login)),
+    );
+}
 
 type UserService = web::Data<std::sync::Arc<dyn IUserService>>;
 

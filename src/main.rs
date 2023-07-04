@@ -1,45 +1,32 @@
 use actix_web::{middleware::Logger, web, App, HttpServer};
-use dotenv::dotenv;
-use env_logger::Env;
 use salvo_skeleton::{
     core::{ports::user_port::IUserService, services::user_service::UserService},
     infrastructure::{
-        api::{
-            handlers::user_handler::{
-                delete_user, get_user_by_id, get_users, login, register, update_user,
-            },
-            middlewares::auth_middleware::AuthenticateMiddlewareFactory,
-        },
+        api::handlers::user_handler::routes,
         data::{mysql, repositories::user_repository::UserRepository},
     },
 };
-use std::{env, io::Result, sync::Arc};
+use std::{env, io, sync};
 
 #[actix_web::main]
-async fn main() -> Result<()> {
-    env_logger::init_from_env(Env::default().default_filter_or("debug"));
+async fn main() -> io::Result<()> {
+    env_logger::init_from_env(env_logger::Env::default().default_filter_or("debug"));
 
     log::info!("Loading environment variables...");
-    dotenv().ok();
+    dotenv::dotenv().ok();
 
     log::info!("Connecting to database...");
     let conn = mysql::connect_to_database().await.unwrap();
     let user_repo = UserRepository::new(conn);
-    let user_service: Arc<dyn IUserService> = Arc::new(UserService::new(user_repo));
+    let user_service: sync::Arc<dyn IUserService> = sync::Arc::new(UserService::new(user_repo));
 
     let server_port = env::var("SERVER_PORT").unwrap().parse::<u16>().unwrap();
     log::info!("Listening server on port: {:?}", server_port);
     HttpServer::new(move || {
         App::new()
-            .wrap(AuthenticateMiddlewareFactory::new())
             .wrap(Logger::default())
             .wrap(Logger::new("%a %{User-Agent}i"))
-            .route("/users/register", web::post().to(register))
-            .route("/users/login", web::post().to(login))
-            .route("/users", web::get().to(get_users))
-            .route("/users/{user_id}", web::get().to(get_user_by_id))
-            .route("/users/{user_id}", web::put().to(update_user))
-            .route("/users/{user_id}", web::delete().to(delete_user))
+            .service(web::scope("").configure(routes))
             .app_data(web::Data::new(user_service.clone()))
     })
     .bind(("127.0.0.1", server_port))?
