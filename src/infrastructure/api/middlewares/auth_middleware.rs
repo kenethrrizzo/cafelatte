@@ -33,6 +33,8 @@ where
                     if let Err(_) = is_valid {
                         return Err(ErrorUnauthorized("Invalid token."));
                     }
+                } else {
+                    return Err(ErrorUnauthorized("Error while parsing header."));
                 }
             } else {
                 return Err(ErrorUnauthorized("Authorization header not found."));
