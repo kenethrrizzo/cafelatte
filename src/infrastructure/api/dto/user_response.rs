@@ -5,7 +5,6 @@ use serde::Serialize;
 pub struct UserResponse {
     pub id: i32,
     pub complete_name: String,
-    pub token: String,
 }
 
 impl UserResponse {
@@ -17,7 +16,6 @@ impl UserResponse {
         UserResponse {
             id: user.id.unwrap_or_default(),
             complete_name,
-            token: "".to_string(),
         }
     }
 

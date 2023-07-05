@@ -7,7 +7,7 @@ pub fn create_jwt_token(payload: UserPayload) -> String {
     let payload = serde_json::to_value(payload).unwrap();
     let secret = env::var("JWT_SECRET").unwrap();
     let token = encode(
-        &Header::default(),
+        &Header::new(jsonwebtoken::Algorithm::HS256),
         &payload,
         &EncodingKey::from_secret(secret.as_ref()),
     )
@@ -16,8 +16,16 @@ pub fn create_jwt_token(payload: UserPayload) -> String {
     token
 }
 
-pub fn verify_jwt_token(token: String) -> Result<UserPayload, UserError> {
+pub fn verify_jwt_token(mut token: String) -> Result<UserPayload, UserError> {
+    if let Some(t) = token.strip_prefix("Bearer ") {
+        token = t.to_string();
+    } else {
+        log::error!("Bearer not present.");
+        return Err(UserError::Unexpected);
+    }
+
     let secret = env::var("JWT_SECRET").unwrap();
+
     match decode(
         &token,
         &DecodingKey::from_secret(secret.as_ref()),
@@ -29,7 +37,10 @@ pub fn verify_jwt_token(token: String) -> Result<UserPayload, UserError> {
 
             Ok(user_payload)
         }
-        Err(_) => Err(UserError::Unexpected),
+        Err(err) => {
+            log::error!("{}", err);
+            Err(UserError::Unexpected)
+        }
     }
 }
 

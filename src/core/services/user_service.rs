@@ -30,7 +30,7 @@ where
             Ok(user) => {
                 login.set_user(user.clone());
 
-                let payload = UserPayload::new(user.id.unwrap(), user.name, user.surname);
+                let payload = UserPayload::new(user.id.unwrap(), user.name, user.surname, 30);
                 let token = create_jwt_token(payload);
 
                 login.set_token(token);
@@ -52,7 +52,7 @@ where
 
                 login.set_user(user.clone());
 
-                let payload = UserPayload::new(user.id.unwrap(), user.name, user.surname);
+                let payload = UserPayload::new(user.id.unwrap(), user.name, user.surname, 30);
                 let token = create_jwt_token(payload);
 
                 login.set_token(token);

@@ -1,6 +1,8 @@
+use crate::utils::security_util::verify_jwt_token;
 use actix_service::Transform;
 use actix_web::{
     dev::{Service, ServiceRequest, ServiceResponse},
+    error::ErrorUnauthorized,
     Error,
 };
 use futures::future::{ready, LocalBoxFuture, Ready};
@@ -24,9 +26,19 @@ where
         let srv = self.service.clone();
 
         futures::FutureExt::boxed_local(async move {
-            log::debug!("Antes de la ejecución del handler.");
+            if let Some(auth_header) = req.headers().get("Authorization") {
+                if let Ok(token) = auth_header.to_str() {
+                    let is_valid = verify_jwt_token(token.to_string());
+
+                    if let Err(_) = is_valid {
+                        return Err(ErrorUnauthorized("Invalid token."));
+                    }
+                }
+            } else {
+                return Err(ErrorUnauthorized("Authorization header not found."));
+            }
+
             let res = srv.call(req).await?;
-            log::debug!("Después de la ejecución del handler.");
 
             Ok(res)
         })
