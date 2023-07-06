@@ -21,8 +21,11 @@ where
     R: IUserRepository,
 {
     async fn register(&self, mut user: User) -> Result<Login, UserError> {
-        let cypted_password = crypt_password(&user.password);
-        user.set_password(cypted_password);
+        if let Ok(cypted_password) = crypt_password(&user.password) {
+            user.set_password(cypted_password);
+        } else {
+            return Err(UserError::Unauthorized);
+        }
 
         let mut login = Login::new();
 
@@ -31,11 +34,12 @@ where
                 login.set_user(user.clone());
 
                 let payload = UserPayload::new(user.id.unwrap(), user.name, user.surname, 30);
-                let token = create_jwt_token(payload);
-
-                login.set_token(token);
-
-                Ok(login)
+                if let Ok(token) = create_jwt_token(payload) {
+                    login.set_token(token);
+                    Ok(login)
+                } else {
+                    Err(UserError::Unauthorized)
+                }
             }
             Err(_) => Err(UserError::Unauthorized),
         }
@@ -53,11 +57,12 @@ where
                 login.set_user(user.clone());
 
                 let payload = UserPayload::new(user.id.unwrap(), user.name, user.surname, 30);
-                let token = create_jwt_token(payload);
-
-                login.set_token(token);
-
-                Ok(login)
+                if let Ok(token) = create_jwt_token(payload) {
+                    login.set_token(token);
+                    Ok(login)
+                } else {
+                    Err(UserError::Unauthorized)
+                }
             }
             Err(_) => Err(UserError::Unauthorized),
         }

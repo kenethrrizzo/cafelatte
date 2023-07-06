@@ -3,17 +3,28 @@ use bcrypt::{hash, verify};
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
 use std::env;
 
-pub fn create_jwt_token(payload: UserPayload) -> String {
-    let payload = serde_json::to_value(payload).unwrap();
-    let secret = env::var("JWT_SECRET").unwrap();
-    let token = encode(
-        &Header::new(jsonwebtoken::Algorithm::HS256),
-        &payload,
-        &EncodingKey::from_secret(secret.as_ref()),
-    )
-    .unwrap();
+pub fn create_jwt_token(payload: UserPayload) -> Result<String, UserError> {
+    match serde_json::to_value(payload) {
+        Ok(payload) => {
+            let secret = env::var("JWT_SECRET").unwrap();
 
-    token
+            match encode(
+                &Header::new(jsonwebtoken::Algorithm::HS256),
+                &payload,
+                &EncodingKey::from_secret(secret.as_ref()),
+            ) {
+                Ok(token) => Ok(token),
+                Err(err) => {
+                    log::error!("{}", err);
+                    Err(UserError::Unexpected)
+                }
+            }
+        }
+        Err(err) => {
+            log::error!("{}", err);
+            Err(UserError::Unexpected)
+        }
+    }
 }
 
 pub fn verify_jwt_token(mut token: String) -> Result<UserPayload, UserError> {
@@ -50,11 +61,17 @@ pub fn verify_jwt_token(mut token: String) -> Result<UserPayload, UserError> {
 /// con un tipo de costo por defecto y retorna un String que representa la contraseña encriptada.
 ///
 /// ```
-/// let result = salvo_skeleton::utils::security_util::crypt_password(&"password".to_string());
+/// let result = salvo_skeleton::utils::security_util::crypt_password(&"password".to_string()).unwrap();
 /// assert_ne!(result, "password");
 /// ```
-pub fn crypt_password(password: &String) -> String {
-    hash(password, bcrypt::DEFAULT_COST).unwrap()
+pub fn crypt_password(password: &String) -> Result<String, UserError> {
+    match hash(password, bcrypt::DEFAULT_COST) {
+        Ok(crypted_password) => Ok(crypted_password),
+        Err(err) => {
+            log::error!("{}", err);
+            Err(UserError::Unexpected)
+        }
+    }
 }
 
 /// Función que valida si una contraseña es válida.
@@ -65,11 +82,17 @@ pub fn crypt_password(password: &String) -> String {
 ///
 /// ```
 /// let password = "anything".to_string();
-/// let crypted_password = salvo_skeleton::utils::security_util::crypt_password(&password);
+/// let crypted_password = salvo_skeleton::utils::security_util::crypt_password(&password).unwrap();
 /// assert_eq!(
 ///     true,
 ///     salvo_skeleton::utils::security_util::verify_password(password, &crypted_password));
 /// ```
 pub fn verify_password(password_to_verify: String, password: &String) -> bool {
-    verify(password_to_verify, &password).unwrap()
+    match verify(password_to_verify, &password) {
+        Ok(_) => true,
+        Err(err) => {
+            log::error!("{}", err);
+            false
+        }
+    }
 }
