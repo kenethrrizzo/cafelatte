@@ -1,8 +1,8 @@
-drop database if exists `salvo_skeleton`;
+drop database if exists `cafelatte`;
 
-create database `salvo_skeleton`;
+create database `cafelatte`;
 
-use `salvo_skeleton`;
+use `cafelatte`;
 
 create table `user` (
     `id` int primary key auto_increment,
@@ -12,8 +12,3 @@ create table `user` (
     `email` varchar(50) not null,
     `password` varchar(100) not null
 );
-
-insert into `user` 
-    (`name`, `surname`, `phone_number`, `email`, `password`)
-values
-    ('Keneth', 'Riera', '0988059308', 'kenethriera@gmail.com', 'test');

@@ -61,7 +61,7 @@ pub fn verify_jwt_token(mut token: String) -> Result<UserPayload, UserError> {
 /// con un tipo de costo por defecto y retorna un String que representa la contraseña encriptada.
 ///
 /// ```
-/// let result = salvo_skeleton::utils::security_util::crypt_password(&"password".to_string()).unwrap();
+/// let result = cafelatte::utils::security_util::crypt_password(&"password".to_string()).unwrap();
 /// assert_ne!(result, "password");
 /// ```
 pub fn crypt_password(password: &String) -> Result<String, UserError> {
@@ -82,10 +82,10 @@ pub fn crypt_password(password: &String) -> Result<String, UserError> {
 ///
 /// ```
 /// let password = "anything".to_string();
-/// let crypted_password = salvo_skeleton::utils::security_util::crypt_password(&password).unwrap();
+/// let crypted_password = cafelatte::utils::security_util::crypt_password(&password).unwrap();
 /// assert_eq!(
 ///     true,
-///     salvo_skeleton::utils::security_util::verify_password(password, &crypted_password));
+///     cafelatte::utils::security_util::verify_password(password, &crypted_password));
 /// ```
 pub fn verify_password(password_to_verify: String, password: &String) -> bool {
     match verify(password_to_verify, &password) {

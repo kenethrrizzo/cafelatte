@@ -1,5 +1,5 @@
 use actix_web::{middleware::Logger, web, App, HttpServer};
-use salvo_skeleton::{
+use cafelatte::{
     core::{ports::user_port::IUserService, services::user_service::UserService},
     infrastructure::{
         api::handlers::user_handler::routes,

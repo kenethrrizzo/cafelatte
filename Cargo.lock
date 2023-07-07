@@ -382,6 +382,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "cafelatte"
+version = "0.1.0"
+dependencies = [
+ "actix-service",
+ "actix-web",
+ "async-trait",
+ "bcrypt",
+ "chrono",
+ "dotenv",
+ "env_logger",
+ "futures",
+ "jsonwebtoken",
+ "log",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "thiserror",
+]
+
+[[package]]
 name = "cc"
 version = "1.0.79"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1559,26 +1579,6 @@ name = "ryu"
 version = "1.0.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f91339c0467de62360649f8d3e185ca8de4224ff281f66000de5eb2a77a79041"
-
-[[package]]
-name = "salvo-skeleton"
-version = "0.1.0"
-dependencies = [
- "actix-service",
- "actix-web",
- "async-trait",
- "bcrypt",
- "chrono",
- "dotenv",
- "env_logger",
- "futures",
- "jsonwebtoken",
- "log",
- "serde",
- "serde_json",
- "sqlx",
- "thiserror",
-]
 
 [[package]]
 name = "schannel"
