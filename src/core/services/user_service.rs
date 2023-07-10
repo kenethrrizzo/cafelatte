@@ -21,8 +21,8 @@ where
     R: IUserRepository,
 {
     async fn register(&self, mut user: User) -> Result<Login, UserError> {
-        if let Ok(cypted_password) = crypt_password(&user.password) {
-            user.set_password(cypted_password);
+        if let Ok(crypted_password) = crypt_password(&user.password) {
+            user.set_password(crypted_password);
         } else {
             return Err(UserError::Unauthorized);
         }
