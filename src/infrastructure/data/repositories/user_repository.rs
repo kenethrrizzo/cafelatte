@@ -11,7 +11,7 @@ pub struct UserRepository {
 
 #[async_trait::async_trait]
 impl IUserRepository for UserRepository {
-    async fn insert_user(&self, user: UserCore) -> core::result::Result<UserCore, UserError> {
+    async fn insert_user(&self, user: UserCore) -> Result<UserCore, UserError> {
         let mut user_model = UserModel::from_user_core(user);
 
         let result = sqlx::query(
@@ -56,7 +56,7 @@ impl IUserRepository for UserRepository {
         }
     }
 
-    async fn get_users(&self) -> core::result::Result<Vec<UserCore>, UserError> {
+    async fn get_users(&self) -> Result<Vec<UserCore>, UserError> {
         let result = sqlx::query_as::<_, UserModel>("SELECT * FROM user")
             .fetch_all(&self.conn)
             .await;
@@ -73,7 +73,7 @@ impl IUserRepository for UserRepository {
         }
     }
 
-    async fn get_user_by_id(&self, id: u8) -> core::result::Result<UserCore, UserError> {
+    async fn get_user_by_id(&self, id: u8) -> Result<UserCore, UserError> {
         let result = sqlx::query_as::<_, UserModel>("SELECT * FROM user WHERE id=?")
             .bind(id)
             .fetch_one(&self.conn)
@@ -95,7 +95,7 @@ impl IUserRepository for UserRepository {
         &self,
         user_id: i32,
         user: UserCore,
-    ) -> core::result::Result<(), UserError> {
+    ) -> Result<(), UserError> {
         let user_model = UserModel::from_user_core(user);
 
         let result =
@@ -120,7 +120,7 @@ impl IUserRepository for UserRepository {
         }
     }
 
-    async fn delete_user(&self, user_id: i32) -> core::result::Result<(), UserError> {
+    async fn delete_user(&self, user_id: i32) -> Result<(), UserError> {
         let result = sqlx::query("DELETE FROM user WHERE id=?")
             .bind(user_id)
             .execute(&self.conn)

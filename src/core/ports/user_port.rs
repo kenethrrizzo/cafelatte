@@ -3,7 +3,6 @@ use crate::core::{
     errors::user_errors::UserError,
 };
 use async_trait::async_trait;
-use core::result::Result;
 
 #[async_trait]
 pub trait IUserRepository: Send + Sync {
