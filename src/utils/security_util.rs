@@ -16,7 +16,7 @@ pub fn create_jwt_token(payload: UserPayload) -> Result<String, UserError> {
                 Ok(token) => Ok(token),
                 Err(err) => {
                     log::error!("{}", err);
-                    
+
                     Err(UserError::Unexpected)
                 }
             }

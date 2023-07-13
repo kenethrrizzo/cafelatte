@@ -91,11 +91,7 @@ impl IUserRepository for UserRepository {
         }
     }
 
-    async fn update_user(
-        &self,
-        user_id: i32,
-        user: UserCore,
-    ) -> Result<(), UserError> {
+    async fn update_user(&self, user_id: i32, user: UserCore) -> Result<(), UserError> {
         let user_model = UserModel::from_user_core(user);
 
         let result =
