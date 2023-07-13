@@ -29,11 +29,11 @@ where
             match req.headers().get("Authorization") {
                 Some(auth_header) => {
                     let is_valid = verify_jwt_token(auth_header.to_str().unwrap().to_string());
-                    if let Err(_) = is_valid {
-                        return Err(ErrorUnauthorized("Invalid token."));
+                    if let Err(err) = is_valid {
+                        return Err(ErrorUnauthorized(err));
                     }
                 }
-                None => return Err(ErrorUnauthorized("Authorization header not found.")),
+                None => return Err(ErrorUnauthorized("Authorization header not found")),
             }
 
             let res = srv.call(req).await?;

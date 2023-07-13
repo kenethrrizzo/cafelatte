@@ -1,9 +1,12 @@
-use crate::core::{entities::user_payload::UserPayload, errors::user_errors::UserError};
+use crate::core::{
+    entities::user_payload::UserPayload,
+    errors::{jwt_errors::JwtError, user_errors::UserError},
+};
 use bcrypt::{hash, verify};
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
 use std::env;
 
-pub fn create_jwt_token(payload: UserPayload) -> Result<String, UserError> {
+pub fn create_jwt_token(payload: UserPayload) -> Result<String, JwtError> {
     match serde_json::to_value(payload) {
         Ok(payload) => {
             let secret = env::var("JWT_SECRET").unwrap();
@@ -17,19 +20,19 @@ pub fn create_jwt_token(payload: UserPayload) -> Result<String, UserError> {
                 Err(err) => {
                     log::error!("{}", err);
 
-                    Err(UserError::Unexpected)
+                    Err(JwtError::Unexpected)
                 }
             }
         }
         Err(err) => {
             log::error!("{}", err);
 
-            Err(UserError::Unexpected)
+            Err(JwtError::Unexpected)
         }
     }
 }
 
-pub fn verify_jwt_token(mut token: String) -> Result<UserPayload, UserError> {
+pub fn verify_jwt_token(mut token: String) -> Result<UserPayload, JwtError> {
     let secret = env::var("JWT_SECRET").unwrap();
 
     match token.strip_prefix("Bearer ") {
@@ -37,7 +40,7 @@ pub fn verify_jwt_token(mut token: String) -> Result<UserPayload, UserError> {
         None => {
             log::error!("Bearer not present.");
 
-            return Err(UserError::Unexpected);
+            return Err(JwtError::BearerNotPresent);
         }
     }
 
@@ -55,7 +58,7 @@ pub fn verify_jwt_token(mut token: String) -> Result<UserPayload, UserError> {
         Err(err) => {
             log::error!("{}", err);
 
-            Err(UserError::Unexpected)
+            Err(JwtError::Unexpected)
         }
     }
 }
