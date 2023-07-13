@@ -20,12 +20,10 @@ impl UserResponse {
     }
 
     pub fn from_user_core_vec(users: Vec<UserCore>) -> Vec<Self> {
-        let mut response: Vec<UserResponse> = vec![];
-        for user in users {
-            response.push(UserResponse::from_user_core(user));
-        }
-
-        response
+        users
+            .iter()
+            .map(|u| Self::from_user_core(u.clone()))
+            .collect()
     }
 }
 

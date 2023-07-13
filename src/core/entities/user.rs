@@ -34,12 +34,9 @@ impl User {
     }
 
     pub fn from_user_model_vec(rows: Vec<UserModel>) -> Vec<Self> {
-        let mut users: Vec<Self> = Vec::new();
-        for row in &rows {
-            users.push(Self::from_user_model(row.clone()));
-        }
-
-        users
+        rows.iter()
+            .map(|row| Self::from_user_model(row.clone()))
+            .collect()
     }
 
     pub fn set_password(&mut self, password: String) {
