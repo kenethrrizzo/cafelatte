@@ -26,18 +26,14 @@ where
         let srv = self.service.clone();
 
         futures::FutureExt::boxed_local(async move {
-            if let Some(auth_header) = req.headers().get("Authorization") {
-                if let Ok(token) = auth_header.to_str() {
-                    let is_valid = verify_jwt_token(token.to_string());
-
+            match req.headers().get("Authorization") {
+                Some(auth_header) => {
+                    let is_valid = verify_jwt_token(auth_header.to_str().unwrap().to_string());
                     if let Err(_) = is_valid {
                         return Err(ErrorUnauthorized("Invalid token."));
                     }
-                } else {
-                    return Err(ErrorUnauthorized("Error while parsing header."));
                 }
-            } else {
-                return Err(ErrorUnauthorized("Authorization header not found."));
+                None => return Err(ErrorUnauthorized("Authorization header not found.")),
             }
 
             let res = srv.call(req).await?;

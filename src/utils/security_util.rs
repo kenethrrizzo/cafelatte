@@ -16,26 +16,30 @@ pub fn create_jwt_token(payload: UserPayload) -> Result<String, UserError> {
                 Ok(token) => Ok(token),
                 Err(err) => {
                     log::error!("{}", err);
+                    
                     Err(UserError::Unexpected)
                 }
             }
         }
         Err(err) => {
             log::error!("{}", err);
+
             Err(UserError::Unexpected)
         }
     }
 }
 
 pub fn verify_jwt_token(mut token: String) -> Result<UserPayload, UserError> {
-    if let Some(t) = token.strip_prefix("Bearer ") {
-        token = t.to_string();
-    } else {
-        log::error!("Bearer not present.");
-        return Err(UserError::Unexpected);
-    }
-
     let secret = env::var("JWT_SECRET").unwrap();
+
+    match token.strip_prefix("Bearer ") {
+        Some(t) => token = t.to_string(),
+        None => {
+            log::error!("Bearer not present.");
+
+            return Err(UserError::Unexpected);
+        }
+    }
 
     match decode(
         &token,
@@ -50,6 +54,7 @@ pub fn verify_jwt_token(mut token: String) -> Result<UserPayload, UserError> {
         }
         Err(err) => {
             log::error!("{}", err);
+
             Err(UserError::Unexpected)
         }
     }
