@@ -43,3 +43,9 @@ impl User {
         self.password = password;
     }
 }
+
+impl Default for User {
+    fn default() -> Self {
+        Self::new()
+    }
+}

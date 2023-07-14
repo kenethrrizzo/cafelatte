@@ -67,3 +67,9 @@ where
         }))
     }
 }
+
+impl Default for AuthenticateMiddlewareFactory {
+    fn default() -> Self {
+        Self::new()
+    }
+}

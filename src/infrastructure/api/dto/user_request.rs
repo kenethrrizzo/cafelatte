@@ -23,7 +23,7 @@ impl UserRequest {
     }
 
     pub fn is_valid(&self) -> bool {
-        self.email.contains("@")
+        self.email.contains('@')
     }
 
     pub fn dummy() -> Self {
@@ -53,6 +53,6 @@ impl LoginRequest {
     }
 
     pub fn is_valid(&self) -> bool {
-        self.email.contains("@")
+        self.email.contains('@')
     }
 }

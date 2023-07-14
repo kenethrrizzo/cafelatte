@@ -29,3 +29,9 @@ impl Login {
         self.token.clone()
     }
 }
+
+impl Default for Login {
+    fn default() -> Self {
+        Self::new()
+    }
+}

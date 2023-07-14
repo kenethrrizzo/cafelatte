@@ -95,8 +95,8 @@ pub fn crypt_password(password: &String) -> Result<String, UserError> {
 ///     true,
 ///     cafelatte::utils::security_util::verify_password(password, &crypted_password));
 /// ```
-pub fn verify_password(password_to_verify: String, password: &String) -> bool {
-    match verify(password_to_verify, &password) {
+pub fn verify_password(password_to_verify: String, password: &str) -> bool {
+    match verify(password_to_verify, password) {
         Ok(_) => true,
         Err(err) => {
             log::error!("{}", err);

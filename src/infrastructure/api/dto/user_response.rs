@@ -10,7 +10,7 @@ pub struct UserResponse {
 impl UserResponse {
     pub fn from_user_core(user: UserCore) -> Self {
         let mut complete_name = user.name;
-        complete_name.push_str(" ");
+        complete_name.push(' ');
         complete_name.push_str(user.surname.as_str());
 
         UserResponse {
@@ -39,7 +39,7 @@ impl LoginResponse {
         let user = login.get_user();
 
         let mut complete_name = user.name;
-        complete_name.push_str(" ");
+        complete_name.push(' ');
         complete_name.push_str(user.surname.as_str());
 
         LoginResponse {
